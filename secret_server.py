@@ -24,17 +24,21 @@ def ssauth():
 
 def mksecret(token):
 
+    # load new user details
+    with open(".new_user.json") as new_user:
+        user = json.load(new_user)
+
     # create new secret
     secret = client.factory.create("AddSecret")
     secret.token = token.Token
     secret.secretTypeId = 2658234
-    secret.secretName = "created from api"
+    secret.secretName = ("%s, %s's reset/initial password" % (user["lName"], user["fName"])) 
     secret.folderId = 112066
     secret.secretFieldIds = client.factory.create("ArrayOfInt")
     #Resource, Username, Password, Notes, keyfile1, keyfile2, keyfile3, keyfile4, keyfile 5
     secret.secretFieldIds.int = [12155710, 12155711, 12155712, 12155713, 12155714, 12155715, 12155716, 12155717, 12155718]
     secret.secretItemValues = client.factory.create("ArrayOfString")
-    secret.secretItemValues.string = ["", "test@keypr.com", "TestPass", "Test Notes", "", "", "", "" , ""]
+    secret.secretItemValues.string = ["", user["email"], user["password"], user["note"], "", "", "", "" , ""]
 
     add = client.service.AddSecret(secret)
 
