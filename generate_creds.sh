@@ -4,6 +4,7 @@
 #SecretServer
 ssusername=$1
 sspassword=$2
+jcapikey=$3
 
 cat > .credentials.json <<- EOM
 {
@@ -12,6 +13,9 @@ cat > .credentials.json <<- EOM
         "password": "$sspassword",
         "orgcode": "JKGD9",
         "domain": "keypr.com"
+    },
+    "jumpcloud":{
+        "apikey": "$jcapikey"
     }
 }
 EOM
