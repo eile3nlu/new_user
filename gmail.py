@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# automate gmail account creation
 
 import httplib2
 import sys
@@ -56,10 +57,18 @@ def mkemail(service):
     request = service.users().insert(body=userinfo)
     response = request.execute()
 
+def searchemails(service):
+
+    request = service.users().list(domain = "keypr.com")
+    response = request.execute()
+
+    pprint(response)
+
 def main():
 
     service = gmailauth()
     mkemail(service)
+#    searchemails(service)
 
 if __name__ == "__main__":
     main()

@@ -20,5 +20,7 @@ cat > .new_user.json <<- EOM
 }
 EOM
 
-#python secret_server.py
+python secret_server.py
+python gmail.py
 
+#rm .new_user.json
