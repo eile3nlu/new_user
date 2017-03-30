@@ -1,3 +1,5 @@
 *.json
 *.swp
 *.dat
+emails.txt
+groups.txt

@@ -3,7 +3,8 @@
 fName=$1
 lName=$2
 emailPersonal=$3
-ticketNum=$4
+role=$4
+ticketNum=$5
 password=$(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
 
 cat > .new_user.json <<- EOM
@@ -16,7 +17,7 @@ cat > .new_user.json <<- EOM
     "emailPersonal": "$emailPersonal",
     "username": "${fName:0:1}$lName",
     "password": "$password",
-    "role": "x"
+    "role": "$role" 
 }
 EOM
 
