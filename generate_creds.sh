@@ -1,10 +1,11 @@
 #!/bin/bash 
 # generate credentials
 
-#SecretServer
-ssusername=$1
+ssusername=$1 #Secret Server
 sspassword=$2
-jcapikey=$3
+jcapikey=$3 #JumpCloud
+jirausername=$4 #Jira/Confluence
+jirapassword=$5
 
 cat > .credentials.json <<- EOM
 {
@@ -16,6 +17,11 @@ cat > .credentials.json <<- EOM
     },
     "jumpcloud":{
         "apikey": "$jcapikey"
+    },
+    "jira":{
+        "server": "https://keyprprojects.atlassian.net",
+        "username": "$jirausername",
+        "password": "$jirapassword"
     }
 }
 EOM

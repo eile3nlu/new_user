@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Usage: [First Name] [Last Name] [Personal Email] [Role] [Unix ID] [Jira Ticket Number]
+
 fName=$1
 lName=$2
 emailPersonal=$3
@@ -26,5 +28,6 @@ EOM
 python secret_server.py
 python gmail.py
 source jumpcloud.sh
+python confluence.py
 
 #rm .new_user.json

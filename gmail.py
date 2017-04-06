@@ -64,6 +64,7 @@ def setgroups(service, role):
     
     # will have to define set groups by role
     if role == user["role"]:
+        # staff
         groups = ["03vac5uf0tebadn"]
 
     userinfo = {
