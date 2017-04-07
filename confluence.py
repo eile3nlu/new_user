@@ -26,10 +26,6 @@ def add_group(jc, user):
     jc.add_user_to_group(user["email"], "internal-dev")
     jc.add_user_to_group(user["email"], "confluence-users")
 
-    if user["role"] == "staff":
-        pass
-    
-
 def main():
 
     # load admin credentials

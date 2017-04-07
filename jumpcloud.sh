@@ -11,16 +11,18 @@ unixid=$(cat .new_user.json | jq ".unixid")
 group=$(cat .new_user.json | jq ".role")
 
 # modify group settings when role is defined
-if [ "$group" == "staff" ]
+if [ "$group" == "staff" ] || [ "$group" == "cs" ] || [ "$group" == "fs" ] || [ "$group" == "sales" ]  
 then
     groupid=6001
+    tags=()
 else
-    groupid=6001
+    groupid=5002
+    tags=('"keyprdev-group"')
 fi
 
 # create new user in jumpcloud
 curl \
-    -d '{"unix_guid": '$groupid', "unix_uid": '$unixid', "firstname": '$fName', "lastname": '$lName', "email" : '$email', "username" : '$username', "password": '$password'}' \
+    -d '{"unix_guid": '$groupid', "unix_uid": '$unixid', "firstname": '$fName', "lastname": '$lName', "email" : '$email', "username" : '$username', "password": '$password', "ldap_binding_user": "true", "tags": ['$tags']}' \
     -X 'POST' \
     -H 'Content-Type: application/json' \
     -H 'Accespt: application/json' \
