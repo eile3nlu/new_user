@@ -9,6 +9,13 @@ from oauth2client import tools
 from oauth2client.file import Storage
 from oauth2client.client import AccessTokenRefreshError
 from oauth2client.client import OAuth2WebServerFlow
+import base64
+from email.mime.audio import MIMEAudio
+from email.mime.base import MIMEBase
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import mimetypes
 from pprint import pprint
 
 # load new user info
@@ -21,9 +28,10 @@ def gmailauth(setType):
     # load secret
     with open(".client_secret.json") as secret:
         client = json.load(secret)
+
     client_id = client["installed"]["client_id"]
     client_secret = client["installed"]["client_secret"]
-    scope = ("https://www.googleapis.com/auth/admin.directory.%s" % (setType))
+    scope = ("https://www.googleapis.com/auth/%s" % (setType))
 
     # create flow object 
     flow = OAuth2WebServerFlow(client_id, client_secret, scope)
@@ -39,7 +47,10 @@ def gmailauth(setType):
     http = credentials.authorize(http)
 
     # create object to make API calls
-    service = build("admin", "directory_v1", http=http)
+    if "admin" in setType:
+        service = build("admin", "directory_v1", http=http)
+    elif "gmail" in setType:
+        service = build("gmail", "v1", http=http)
 
     return service
 
@@ -60,12 +71,45 @@ def mkemail(service):
     response = request.execute()
 
 # add users to groups
-def setgroups(service, role):
+def setgroups(service):
     
     # will have to define set groups by role
-    if role == user["role"]:
-        # staff
+    if user["role"].lower() == "staff":
+        # staff@keypr.com
         groups = ["03vac5uf0tebadn"]
+
+    elif user["role"].lower() == "ops":
+        # staff@keypr.com, bridge-ops@keypr.com, dev@keypr.com, kcs-alerts@keypr.com, ops@keypr.com, security@keypr.com, service-status@keypr.com, build@keypr.com
+        groups = ["03vac5uf0tebadn", "00pkwqa10t6184d", "03as4poj18f1ku8", "01baon6m2p11k2p", "00tyjcwt0jo3gxm", "00ihv6361eix8zb", "035nkun23dv4k8i", "03x8tuzt0lobslp"]
+
+    elif user["role"].lower() == "ios":
+        # staff@keypr.com, dev@keypr.com, ios-dev@keypr.com
+        groups = ["03vac5uf0tebadn", "03as4poj18f1ku8", "03oy7u292fyscdg"]
+        
+    elif user["role"].lower() == "android":
+        # staff@keypr.com, dev@keypr.com, android-dev@keypr.com
+        groups = ["03vac5uf0tebadn", "03as4poj18f1ku8", "02fk6b3p49a7k54"]
+
+    elif user["role"].lower() == "qa":
+        # staff@keypr.com, dev@keypr.com, qateam@keypr.com, testeng@keypr.com
+        groups = ["03vac5uf0tebadn", "03as4poj18f1ku8", "00pkwqa130iy7m3", "030j0zll28x34h6"]
+
+    elif user["role"].lower() == "hardware":
+        # staff@keypr.com, dev@keypr.com, kilt@keypr.com
+        groups = ["03vac5uf0tebadn", "03as4poj18f1ku8", "02bn6wsx190y7ep"]
+
+    elif user["role"].lower() == "fs":
+        # staff@keypr.com, fieldservices@keypr.com, support@keypr.com, supportafterhours@keypr.com, updates@keypr.com
+        groups = ["03vac5uf0tebadn", "01y810tw3w17osf", "02s8eyo146al189", "04f1mdlm3pinoxb", "0111kx3o0iyeqei"
+
+    elif user["role"].lower() == "cs":
+        # staff@keypr.com
+        groups = ["03vac5uf0tebadn"]
+
+    elif user["role"].lower() == "sales":
+        # staff@keypr.com, sales@keypr.com
+        groups = ["03vac5uf0tebadn", "04d34og824t1ihr"]
+    
 
     userinfo = {
                 "kind": "admin#directory#member",
@@ -93,13 +137,42 @@ def searchemail(service):
 
     pprint(response)
 
+def createmessage(TYPE):
+
+    # load email templates 
+    with open("email_templates.json") as templates:
+        template = json.load(templates)
+
+    message = MIMEText(template[TYPE]["message"])
+    message["to"] = user["email"] 
+    message["from"] = "ckoh@keypr.com"
+    message["subject"] = template[TYPE]["title"]
+
+    return {"raw": base64.urlsafe_b64encode(message.as_string())}
+
+
+def sendemail(service, message):
+
+    message = (service.users().messages().send(userId="me", body=message).execute())
+
+
 def main():
 
-    userservice = gmailauth("user")
+    # create email account
+    userservice = gmailauth("admin.directory.user")
     mkemail(userservice)
-    groupservice = gmailauth("group")
-    # options: staff.  Will add more later 
-    setgroups(groupservice, "staff")
+    
+    # set groups
+    groupservice = gmailauth("admin.directory.group")
+    setgroups(groupservice)
+    
+
+    # send email notifications
+    mailservice = gmailauth("gmail.compose")
+    message = createmessage("calendar")
+    sendemail(mailservice, message)
+    message = createmessage("slack")
+    sendemail(mailservice, message)
 
 if __name__ == "__main__":
     main()
