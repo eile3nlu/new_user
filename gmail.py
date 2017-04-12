@@ -78,6 +78,10 @@ def setgroups(service):
         # staff@keypr.com
         groups = ["03vac5uf0tebadn"]
 
+    elif user["role"].lower() == "dev":
+        # staff@keypr.com, dev@keypr.com, internal@keypr.com
+        groups = ["03vac5uf0tebadn", "03as4poj18f1ku8", "03o7alnk144585r"]
+
     elif user["role"].lower() == "ops":
         # staff@keypr.com, bridge-ops@keypr.com, dev@keypr.com, kcs-alerts@keypr.com, ops@keypr.com, security@keypr.com, service-status@keypr.com, build@keypr.com
         groups = ["03vac5uf0tebadn", "00pkwqa10t6184d", "03as4poj18f1ku8", "01baon6m2p11k2p", "00tyjcwt0jo3gxm", "00ihv6361eix8zb", "035nkun23dv4k8i", "03x8tuzt0lobslp"]
@@ -100,7 +104,7 @@ def setgroups(service):
 
     elif user["role"].lower() == "fs":
         # staff@keypr.com, fieldservices@keypr.com, support@keypr.com, supportafterhours@keypr.com, updates@keypr.com
-        groups = ["03vac5uf0tebadn", "01y810tw3w17osf", "02s8eyo146al189", "04f1mdlm3pinoxb", "0111kx3o0iyeqei"
+        groups = ["03vac5uf0tebadn", "01y810tw3w17osf", "02s8eyo146al189", "04f1mdlm3pinoxb", "0111kx3o0iyeqei"]
 
     elif user["role"].lower() == "cs":
         # staff@keypr.com
@@ -168,11 +172,11 @@ def main():
     
 
     # send email notifications
-    mailservice = gmailauth("gmail.compose")
-    message = createmessage("calendar")
-    sendemail(mailservice, message)
-    message = createmessage("slack")
-    sendemail(mailservice, message)
+    #mailservice = gmailauth("gmail.compose")
+    #message = createmessage("calendar")
+    #sendemail(mailservice, message)
+    #message = createmessage("slack")
+    #sendemail(mailservice, message)
 
 if __name__ == "__main__":
     main()
