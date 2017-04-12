@@ -147,7 +147,7 @@ def createmessage(TYPE):
     with open("email_templates.json") as templates:
         template = json.load(templates)
 
-    message = MIMEText(template[TYPE]["message"])
+    message = MIMEText(template[TYPE]["message"], "html")
     message["to"] = user["email"] 
     message["from"] = "ckoh@keypr.com"
     message["subject"] = template[TYPE]["title"]
@@ -163,20 +163,20 @@ def sendemail(service, message):
 def main():
 
     # create email account
-    userservice = gmailauth("admin.directory.user")
-    mkemail(userservice)
+    #userservice = gmailauth("admin.directory.user")
+    #mkemail(userservice)
     
     # set groups
-    groupservice = gmailauth("admin.directory.group")
-    setgroups(groupservice)
+    #groupservice = gmailauth("admin.directory.group")
+    #setgroups(groupservice)
     
 
     # send email notifications
-    #mailservice = gmailauth("gmail.compose")
-    #message = createmessage("calendar")
-    #sendemail(mailservice, message)
-    #message = createmessage("slack")
-    #sendemail(mailservice, message)
+    mailservice = gmailauth("gmail.compose")
+    message = createmessage("calendar")
+    sendemail(mailservice, message)
+    message = createmessage("slack")
+    sendemail(mailservice, message)
 
 if __name__ == "__main__":
     main()
