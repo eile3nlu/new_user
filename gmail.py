@@ -70,50 +70,65 @@ def mkemail(service):
     request = service.users().insert(body=userinfo)
     response = request.execute()
 
+    print("Keypr Gmail: %s" % user["email"])
+
 # add users to groups
 def setgroups(service):
     
     # will have to define set groups by role
     if user["role"].lower() == "staff":
         # staff@keypr.com
+        print("Keypr Gmail Gropus: staff@keypr.com")
         groups = ["03vac5uf0tebadn"]
 
     elif user["role"].lower() == "dev":
-        # staff@keypr.com, dev@keypr.com, internal@keypr.com
-        groups = ["03vac5uf0tebadn", "03as4poj18f1ku8", "03o7alnk144585r"]
+        # staff@keypr.com, dev@keypr.com
+        print("Keypr Gmail Groups: staff@keypr.com, dev@keypr.com")
+        groups = ["03vac5uf0tebadn", "03as4poj18f1ku8"]
 
     elif user["role"].lower() == "ops":
         # staff@keypr.com, bridge-ops@keypr.com, dev@keypr.com, kcs-alerts@keypr.com, ops@keypr.com, security@keypr.com, service-status@keypr.com, build@keypr.com
+        print("Keypr Gmail Groups: staff@keypr.com, bridge-ops@keypr.com, dev@keypr.com, kcs-alerts@keypr.com, ops@keypr.com, security@keypr.com, service-status@keypr.com, build@keypr.com")
         groups = ["03vac5uf0tebadn", "00pkwqa10t6184d", "03as4poj18f1ku8", "01baon6m2p11k2p", "00tyjcwt0jo3gxm", "00ihv6361eix8zb", "035nkun23dv4k8i", "03x8tuzt0lobslp"]
 
     elif user["role"].lower() == "ios":
         # staff@keypr.com, dev@keypr.com, ios-dev@keypr.com
+        print("Keypr Gmail Groups: staff@keypr.com, dev@keypr.com, ios-dev@keypr.com")
         groups = ["03vac5uf0tebadn", "03as4poj18f1ku8", "03oy7u292fyscdg"]
         
     elif user["role"].lower() == "android":
         # staff@keypr.com, dev@keypr.com, android-dev@keypr.com
+        print("Keypr Gmail Groups: staff@keypr.com, dev@keypr.com, android-dev@keypr.com")
         groups = ["03vac5uf0tebadn", "03as4poj18f1ku8", "02fk6b3p49a7k54"]
 
     elif user["role"].lower() == "qa":
         # staff@keypr.com, dev@keypr.com, qateam@keypr.com, testeng@keypr.com
+        print("Keypr Gmail Groups: staff@keypr.com, dev@keypr.com, qateam@keypr.com, testeng@keypr.com")
         groups = ["03vac5uf0tebadn", "03as4poj18f1ku8", "00pkwqa130iy7m3", "030j0zll28x34h6"]
 
     elif user["role"].lower() == "hardware":
         # staff@keypr.com, dev@keypr.com, kilt@keypr.com
+        print("Keypr Gmail Groups: staff@keypr.com, dev@keypr.com, kilt@keypr.com")
         groups = ["03vac5uf0tebadn", "03as4poj18f1ku8", "02bn6wsx190y7ep"]
 
     elif user["role"].lower() == "fs":
         # staff@keypr.com, fieldservices@keypr.com, support@keypr.com, supportafterhours@keypr.com, updates@keypr.com
+        print("Keypr Gmail Groups: staff@keypr.com, fieldservices@keypr.com, support@keypr.com, supportafterhours@keypr.com, updates@keypr.com")
         groups = ["03vac5uf0tebadn", "01y810tw3w17osf", "02s8eyo146al189", "04f1mdlm3pinoxb", "0111kx3o0iyeqei"]
 
     elif user["role"].lower() == "cs":
         # staff@keypr.com
+        print("Keypr Gmail Groups: staff@keypr.com")
         groups = ["03vac5uf0tebadn"]
 
     elif user["role"].lower() == "sales":
         # staff@keypr.com, sales@keypr.com
+        print("Keypr Gmail Groups: staff@keypr.com, sales@keypr.com")
         groups = ["03vac5uf0tebadn", "04d34og824t1ihr"]
     
+    if user["kyiv"].lower() == "t":
+        print("kyiv-team@keypr.com")
+        groups.append("023ckvvd2s3scaj")
 
     userinfo = {
                 "kind": "admin#directory#member",
@@ -163,20 +178,23 @@ def sendemail(service, message):
 def main():
 
     # create email account
-    #userservice = gmailauth("admin.directory.user")
-    #mkemail(userservice)
+    userservice = gmailauth("admin.directory.user")
+    mkemail(userservice)
     
     # set groups
-    #groupservice = gmailauth("admin.directory.group")
-    #setgroups(groupservice)
+    groupservice = gmailauth("admin.directory.group")
+    setgroups(groupservice)
     
 
     # send email notifications
     mailservice = gmailauth("gmail.compose")
     message = createmessage("calendar")
     sendemail(mailservice, message)
+    print("Staff calendar email: Sent")
     message = createmessage("slack")
     sendemail(mailservice, message)
+    print("Slack email: Sent")
+    
 
 if __name__ == "__main__":
     main()

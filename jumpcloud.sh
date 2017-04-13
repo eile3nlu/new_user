@@ -15,9 +15,11 @@ if [ "$group" == "staff" ] || [ "$group" == "cs" ] || [ "$group" == "fs" ] || [ 
 then
     groupid=6001
     tags=()
+    echo "JumpCloud Tags: "
 else
     groupid=5002
     tags=('"keyprdev-group"')
+    echo "JumpCloud tags: keyprdev-group"
 fi
 
 # create new user in jumpcloud

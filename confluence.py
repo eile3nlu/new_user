@@ -25,6 +25,7 @@ def add_group(jc, user):
     # username, group name
     jc.add_user_to_group(user["email"], "internal-dev")
     jc.add_user_to_group(user["email"], "confluence-users")
+    print("Jira/Confluence Groups: internal-dev, jira-users, confluence-users")
 
 def main():
 
