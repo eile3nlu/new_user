@@ -1,10 +1,11 @@
 #!/bin/bash
 
-# Usage: [First Name] [Last Name] [Keypr Email]
+# Usage: [First Name] [Last Name] [Role]
 
 fName=$1
 lName=$2
-email=$3
+role=$3 # staff, ops, dev, ios, android, qu, hardware, fs, cs, sales
+uName=$(tr "[:upper:]" "[:lower:]" <<< "${fName:0:1}")$(tr "[:upper:]" "[:lower:]" <<< "$lName")
 password=$(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
 
 cat > .new_user.json <<- EOM
@@ -13,11 +14,11 @@ cat > .new_user.json <<- EOM
     "lName": "$lName",
     "fullName": "",
     "note": "",
-    "email": "$email",
-    "emailPersonal": "",
+    "email": "$uName@keypr.com",
+    "emailPersonal": "$uName.old@keypr.com",
     "username": "",
     "password": "$password",
-    "role": "",
+    "role": "$role",
     "kyiv": "",
     "unixid": ""
 }
