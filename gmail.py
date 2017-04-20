@@ -127,7 +127,7 @@ def setgroups(service):
         groups = ["03vac5uf0tebadn", "04d34og824t1ihr"]
     
     if user["kyiv"].lower() == "t":
-        print("kyiv-team@keypr.com")
+        print("Speical Groups: kyiv-team@keypr.com")
         groups.append("023ckvvd2s3scaj")
 
     userinfo = {
@@ -162,8 +162,14 @@ def createmessage(TYPE):
     with open("email_templates.json") as templates:
         template = json.load(templates)
 
-    message = MIMEText(template[TYPE]["message"], "html")
-    message["to"] = user["email"] 
+    if TYPE == "welcome":
+        message = MIMEText((template[TYPE]["message"] % (user["fullName"], user["email"], user["password"], user["email"])), "html")
+        message["to"] = user["emailPersonal"] 
+
+    else:
+        message = MIMEText(template[TYPE]["message"], "html")
+        message["to"] = user["email"] 
+
     message["from"] = "ckoh@keypr.com"
     message["subject"] = template[TYPE]["title"]
 
@@ -183,14 +189,14 @@ def mvemail(service):
     request = service.users().update(userKey=user["email"], body=userinfo)
     response = request.execute()
 
-    print("Off-boarding: Keypr gmail changed %s -> %s" % (user["email"], user["emailPersonal"]))
+    print("Off-boarding (Gmail): Keypr gmail changed %s -> %s" % (user["email"], user["emailPersonal"]))
 
 def rmemailalias(service):
 
     request = service.users().aliases().delete(alias=user["email"], userKey=user["emailPersonal"])
     response = request.execute()
 
-    print("Off-boarding: Keypr gmail %s alias removed %s" % (user["emailPersonal"], user["email"]))
+    print("Off-boarding (Gmail): Keypr gmail alias %s removed from %s" % (user["email"], user["emailPersonal"]))
 
 def mkalias(service):
 
@@ -199,44 +205,44 @@ def mkalias(service):
                 }
 
     if user["role"] == "staff":
-        group == ""
+        group = ""
 
     elif user["role"] == "ops":
-        group == ""
+        group = ""
 
     elif user["role"] == "dev":
-        group == ""
+        group = ""
 
     elif user["role"] == "ios":
-        group == ""
+        group = ""
 
     elif user["role"] == "android":
-        group == ""
+        group = ""
 
     elif user["role"] == "qa":
-        group == "qa-manager@keypr.com"
+        group = "qa-manager@keypr.com"
 
     elif user["role"] == "hardware":
-        group == ""
+        group = ""
 
     elif user["role"] == "fs":
-        group == "fs-manager@keypr.com"
+        group = "fs-manager@keypr.com"
 
     elif user["role"] == "cs":
-        group == ""
+        group = ""
 
     elif user["role"] == "sales":
-        group == "ex-sales@keypr.com"
+        group = "ex-sales@keypr.com"
 
-    request = service.groups().aliases().insert(groupKey="ex-sales@keypr.com", body=userinfo)
+    request = service.groups().aliases().insert(groupKey=group, body=userinfo)
     response = request.execute()
 
-    print("Off-boarding: Keypr gmail %s added as alias to %s group" % (user["email"], group))
+    print("Off-boarding (Gmail): Keypr gmail %s added as alias to %s group" % (user["email"], group))
 
 def main():
 
     # on-boarding
-    if user["username"] != "":
+    if user["note"] != "Delete":
         # create email account
         userservice = gmailauth("admin.directory.user")
         mkemail(userservice)
@@ -249,24 +255,31 @@ def main():
         mailservice = gmailauth("gmail.compose")
         message = createmessage("calendar")
         sendemail(mailservice, message)
-        print("Staff calendar email: Sent")
+        print("Staff calendar email: Sent %s" % user["email"])
+
         message = createmessage("slack")
         sendemail(mailservice, message)
-        print("Slack email: Sent")
-    
+        print("Slack email: Sent to %s" % user["email"])
+
+        message = createmessage("welcome")
+        sendemail(mailservice, message)
+        print("Welcome email: Sent to %s" % user["emailPersonal"])
+
     # off-boarding
     else:
         # change email to .old
-        #userservice = gmailauth("admin.directory.user")
-        #mvemail(userservice)
+        userservice = gmailauth("admin.directory.user")
+        mvemail(userservice)
 
         # remove old keypr.com email from email alias
-        #userservice = gmailauth("admin.directory.user.alias")
-        #rmemailalias(userservice)
+        userservice = gmailauth("admin.directory.user.alias")
+        rmemailalias(userservice)
 
         # create alias on manager group
-        userservice = gmailauth("admin.directory.group")
-        mkalias(userservice)
+        # needs more groups to be filled out
+        print("Off-boarding: *MANUAL ENTRY NEEDED*: Add user to manager group")
+        #userservice = gmailauth("admin.directory.group")
+        #mkalias(userservice)
         
 
 if __name__ == "__main__":

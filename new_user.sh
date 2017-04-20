@@ -10,7 +10,8 @@ role=$4 # staff, ops, dev, ios, android, qu, hardware, fs, cs, sales
 kyiv=$5
 unixid=$6
 ticketNum=$7
-password=$(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
+password=$(cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9!@#$%&*' | fold -w 12 | head -n 1)
+
 
 cat > .new_user.json <<- EOM
 {

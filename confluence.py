@@ -27,6 +27,13 @@ def add_group(jc, user):
     jc.add_user_to_group(user["email"], "confluence-users")
     print("Jira/Confluence Groups: internal-dev, jira-users, confluence-users")
 
+def remove_group(jc, user):
+    
+    jc.remove_user_from_group(user["email"], "internal-dev")
+    jc.remove_user_from_group(user["email"], "confluence-users")
+    jc.remove_user_from_group(user["email"], "jira-users")
+    print("Off-boarding (Jira/Confluence): Removed user from groups (internal-dev, confluence-users)")
+
 def main():
 
     # load admin credentials
@@ -38,8 +45,16 @@ def main():
         user = json.load(new_user)
     
     jc = auth(creds["jira"]["server"], creds["jira"]["username"], creds["jira"]["password"])
-    add_user(jc, user)
-    add_group(jc, user)
+
+    if user["note"] != "Delete":
+
+        add_user(jc, user)
+        add_group(jc, user)
+
+    else:
+
+        remove_group(jc, user)
+
 
 if __name__ == "__main__":
     main()

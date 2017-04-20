@@ -29,7 +29,7 @@ def mksecret(token):
         user = json.load(new_user)
 
     # on-boarding
-    if user["username"] != "":
+    if user["note"] != "Delete":
         secretname  = ("%s, %s's reset/initial password" % (user["lName"], user["fName"])) 
         values = ["", user["email"], user["password"], user["note"], "", "", "", "" , ""]
 
@@ -37,6 +37,7 @@ def mksecret(token):
     else:
         secretname  = ("%s, %s's reset/offboarding password" % (user["lName"], user["fName"])) 
         values = ["", user["email"], user["password"], "", "", "", "", "" , ""]
+        print("Off-boarding (Secret Server): New password generated for %s, %s" % (user["lName"], user["fName"]))
 
     # create secret
     secret = client.factory.create("AddSecret")
