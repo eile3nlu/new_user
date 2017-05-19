@@ -35,7 +35,6 @@ then
 
     echo "Off-boarding (JumpCloud): user password changed, user email changed, user tags removed"
 
-
 elif [ "$note" != 'Delete' ]
 then
 
@@ -47,13 +46,24 @@ then
         echo "JumpCloud Tags: "
     else
         groupid=5002
-        tags=('"keyprdev-group"')
-        echo "JumpCloud tags: keyprdev-group"
+        tags=(
+            '"artifactory"',
+            '"keyprdev-group"'
+        )
+        echo "JumpCloud tags: keyprdev-group, artifactory"
     fi
+
+    # create string for tags
+    tag="["
+    for x in "${tags[@]}"
+    do
+        tag+="$x"
+    done
+    tag+="]"
 
     # create new user in jumpcloud
     curl \
-        -d '{"unix_guid": '$groupid', "unix_uid": '$unixid', "firstname": '$fName', "lastname": '$lName', "email" : '$email', "username" : '$username', "password": '$password', "ldap_binding_user": "true", "tags": ['$tags']}' \
+        -d '{"unix_guid": '$groupid', "unix_uid": '$unixid', "firstname": '$fName', "lastname": '$lName', "email" : '$email', "username" : '$username', "password": '$password', "ldap_binding_user": "true", "tags": '$tag'}' \
         -X 'POST' \
         -H 'Content-Type: application/json' \
         -H 'Accespt: application/json' \

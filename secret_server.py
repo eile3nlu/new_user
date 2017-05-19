@@ -4,6 +4,7 @@
 import sys
 import suds
 import json
+from pprint import pprint
 
 client = suds.client.Client("https://www.secretserveronline.com/webservices/SSWebservice.asmx?wsdl")
 
@@ -18,7 +19,7 @@ def ssauth():
 
     # searches for IDs
     #secretTypeSearch = client.service.GetSecretTemplates(token.Token)
-    #folderSearch = client.service.SearchFolders(token.Token, "on")
+    #folderSearch = client.service.SearchFolders(token.Token, "egress")
 
     return token
 
@@ -44,7 +45,12 @@ def mksecret(token):
     secret.token = token.Token
     secret.secretTypeId = 2658234
     secret.secretName = secretname 
-    secret.folderId = 112066
+
+    if user["note"] != "Delete":
+        secret.folderId = 112066 # on-boarding
+    else:
+        secret.folderId = 114965
+
     secret.secretFieldIds = client.factory.create("ArrayOfInt")
     #Resource, Username, Password, Notes, keyfile1, keyfile2, keyfile3, keyfile4, keyfile 5
     secret.secretFieldIds.int = [12155710, 12155711, 12155712, 12155713, 12155714, 12155715, 12155716, 12155717, 12155718]

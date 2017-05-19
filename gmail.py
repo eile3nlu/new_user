@@ -4,6 +4,7 @@
 import httplib2
 import sys
 import json
+import time
 from apiclient.discovery import build
 from oauth2client import tools
 from oauth2client.file import Storage
@@ -73,7 +74,7 @@ def mkemail(service):
     print("Keypr Gmail: %s" % user["email"])
 
 # add users to groups
-def setgroups(service):
+def setgroups(service, action):
     
     # will have to define set groups by role
     if user["role"].lower() == "staff":
@@ -138,8 +139,13 @@ def setgroups(service):
                 }
 
     for group in groups:
-        request = service.members().insert(body=userinfo, groupKey=group)
-        response = request.execute()
+        if action == "insert":
+            request = service.members().insert(body=userinfo, groupKey=group)
+            response = request.execute()
+        elif action == "delete":
+            request = service.members().delete(memberKey=userinfo["email"], groupKey=group)
+            response = request.execute()
+
 
 # search groups for a list of ID's
 def searchgroups(service):
@@ -208,28 +214,28 @@ def mkalias(service):
         group = ""
 
     elif user["role"] == "ops":
-        group = ""
+        group = "ops-manager@keypr.com"
 
     elif user["role"] == "dev":
-        group = ""
+        group = "director-sw-eng@keypr.com"
 
     elif user["role"] == "ios":
-        group = ""
+        group = "director-sw-eng@keypr.com"
 
     elif user["role"] == "android":
-        group = ""
+        group = "director-sw-eng@keypr.com"
 
     elif user["role"] == "qa":
         group = "qa-manager@keypr.com"
 
     elif user["role"] == "hardware":
-        group = ""
+        group = "hw-manager@keypr.com"
 
     elif user["role"] == "fs":
         group = "fs-manager@keypr.com"
 
     elif user["role"] == "cs":
-        group = ""
+        group = "cs-manager@keypr.com"
 
     elif user["role"] == "sales":
         group = "ex-sales@keypr.com"
@@ -246,20 +252,24 @@ def main():
         # create email account
         userservice = gmailauth("admin.directory.user")
         mkemail(userservice)
+        time.sleep(3)
     
         # set groups
         groupservice = gmailauth("admin.directory.group")
-        setgroups(groupservice)
+        setgroups(groupservice, "insert")
+        time.sleep(3)
 
         # send email notifications
         mailservice = gmailauth("gmail.compose")
         message = createmessage("calendar")
         sendemail(mailservice, message)
         print("Staff calendar email: Sent %s" % user["email"])
+        time.sleep(3)
 
         message = createmessage("slack")
         sendemail(mailservice, message)
         print("Slack email: Sent to %s" % user["email"])
+        time.sleep(3)
 
         message = createmessage("welcome")
         sendemail(mailservice, message)
@@ -267,19 +277,26 @@ def main():
 
     # off-boarding
     else:
+        # set groups
+        groupservice = gmailauth("admin.directory.group")
+        setgroups(groupservice, "delete")
+        time.sleep(3)
+
         # change email to .old
         userservice = gmailauth("admin.directory.user")
         mvemail(userservice)
+        time.sleep(3)
 
         # remove old keypr.com email from email alias
         userservice = gmailauth("admin.directory.user.alias")
         rmemailalias(userservice)
+        time.sleep(3)
 
         # create alias on manager group
         # needs more groups to be filled out
         print("Off-boarding: *MANUAL ENTRY NEEDED*: Add user to manager group")
-        #userservice = gmailauth("admin.directory.group")
-        #mkalias(userservice)
+        userservice = gmailauth("admin.directory.group")
+        mkalias(userservice)
         
 
 if __name__ == "__main__":
