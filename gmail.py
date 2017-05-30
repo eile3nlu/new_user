@@ -74,7 +74,7 @@ def mkemail(service):
     print("Keypr Gmail: %s" % user["email"])
 
 # add users to groups
-def setgroups(service, action):
+def setgroups(service):
     
     # will have to define set groups by role
     if user["role"].lower() == "staff":
@@ -139,12 +139,8 @@ def setgroups(service, action):
                 }
 
     for group in groups:
-        if action == "insert":
-            request = service.members().insert(body=userinfo, groupKey=group)
-            response = request.execute()
-        elif action == "delete":
-            request = service.members().delete(memberKey=userinfo["email"], groupKey=group)
-            response = request.execute()
+        request = service.members().insert(body=userinfo, groupKey=group)
+        response = request.execute()
 
 
 # search groups for a list of ID's
@@ -184,6 +180,23 @@ def createmessage(TYPE):
 def sendemail(service, message):
 
     message = (service.users().messages().send(userId="me", body=message).execute())
+
+def deletegroups(service):
+
+    request = service.groups().list(userKey=user["email"])
+    response = request.execute()
+
+    groupids = []
+    groups = []
+    for groupid in response["groups"]:
+       groupids.append(groupid["id"]) 
+       groups.append(groupid["name"])
+
+    for group in groupids:
+        request = service.members().delete(memberKey=user["email"], groupKey=group)
+        response = request.execute()
+
+    print("Off-boarding (Gmail): Keypr gmail %s removed from %s groups" % (user["email"], groups))
 
 def mvemail(service):
 
@@ -256,7 +269,7 @@ def main():
     
         # set groups
         groupservice = gmailauth("admin.directory.group")
-        setgroups(groupservice, "insert")
+        setgroups(groupservice)
         time.sleep(3)
 
         # send email notifications
@@ -277,9 +290,10 @@ def main():
 
     # off-boarding
     else:
-        # set groups
+
+        # remove user from all groups
         groupservice = gmailauth("admin.directory.group")
-        setgroups(groupservice, "delete")
+        deletegroups(groupservice)
         time.sleep(3)
 
         # change email to .old
@@ -293,11 +307,8 @@ def main():
         time.sleep(3)
 
         # create alias on manager group
-        # needs more groups to be filled out
-        print("Off-boarding: *MANUAL ENTRY NEEDED*: Add user to manager group")
         userservice = gmailauth("admin.directory.group")
         mkalias(userservice)
-        
 
 if __name__ == "__main__":
     main()

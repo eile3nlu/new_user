@@ -24,9 +24,9 @@ cat > .new_user.json <<- EOM
 }
 EOM
 
-#python secret_server.py
+python secret_server.py
 python gmail.py
-#source jumpcloud.sh
-#python confluence.py
+source jumpcloud.sh
+python confluence.py
 
 #rm .new_user.json
