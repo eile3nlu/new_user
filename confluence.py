@@ -32,7 +32,7 @@ def remove_group(jc, user):
     jc.remove_user_from_group(user["email"], "internal-dev")
     jc.remove_user_from_group(user["email"], "confluence-users")
     jc.remove_user_from_group(user["email"], "jira-users")
-    print("Off-boarding (Jira/Confluence): Removed user from groups (internal-dev, confluence-users)")
+    print("Off-boarding (Jira/Confluence): Removed user from groups (internal-dev, confluence-users, jira-users)")
 
 def main():
 
@@ -48,8 +48,10 @@ def main():
 
     if user["note"] != "Delete":
 
-        add_user(jc, user)
-        add_group(jc, user)
+        # contractors do not get confluence access, on an as-needed basis
+        if user["contractor"].lower() == "f":
+            add_user(jc, user)
+            add_group(jc, user)
 
     else:
 

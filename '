@@ -76,7 +76,7 @@ def mkemail(service):
 # add users to groups
 def setgroups(service):
     
-    # team mailing groups
+    # groups by role
     if user["role"].lower() == "staff":
         # staff@keypr.com
         print("Keypr Gmail Gropus: staff@keypr.com")
@@ -127,22 +127,22 @@ def setgroups(service):
         print("Keypr Gmail Groups: sales@keypr.com")
         groups = ["04d34og824t1ihr"]
     
-    # "Group" mailing groups
-    if user["contractor"].lower() == "t":
+    elif user["role"].lower() == "cont":
         # external@keypr.com    
         print("Keypr Gmail Groups: external@keypr.com")
-        groups.append(["03ygebqi16xg5kj"])
+        groups = []
 
+
+    # groups by location  
+    if user["kyiv"].lower() == "t":
+        print("Speical Groups: kyiv-team@keypr.com, staff@keypr.com")
+        groups.append("023ckvvd2s3scaj")
+        groups.append("03vac5uf0tebadn")
     else:
-
-        if user["kyiv"].lower() == "t":
-            print("Speical Groups: kyiv-team@keypr.com, staff@keypr.com")
-            groups.append("023ckvvd2s3scaj")
-            groups.append("03vac5uf0tebadn")
-        else:
-            print("Speical Groups: la-team@keypr.com, staff@keypr.com")
-            groups.append("01ci93xb1za9tyq")
-            groups.append("03vac5uf0tebadn")
+        print("Speical Groups: la-team@keypr.com, staff@keypr.com")
+        print("Lookup group id")
+        #groups.append("")
+        groups.append("03vac5uf0tebadn")
 
     userinfo = {
                 "kind": "admin#directory#member",
@@ -273,6 +273,10 @@ def mkalias(service):
 
 def main():
 
+    groupservice = gmailauth("admin.directory.group")
+    searchgroups(groupservice)
+
+    '''
     # on-boarding
     if user["note"] != "Delete":
         # create email account
@@ -287,23 +291,19 @@ def main():
 
         # send email notifications
         mailservice = gmailauth("gmail.compose")
-
-        message = createmessage("welcome")
-        sendemail(mailservice, message)
-        print("Welcome email: Sent to %s" % user["emailPersonal"])
-
         message = createmessage("calendar")
         sendemail(mailservice, message)
         print("Staff calendar email: Sent %s" % user["email"])
         time.sleep(3)
 
-        # Only send slack invite to non-contractors (contractors on an as-needed basis)
-        if user["contractor"].lower() == "f":
-            message = createmessage("slack")
-            sendemail(mailservice, message)
-            print("Slack email: Sent to %s" % user["email"])
-            time.sleep(3)
+        message = createmessage("slack")
+        sendemail(mailservice, message)
+        print("Slack email: Sent to %s" % user["email"])
+        time.sleep(3)
 
+        message = createmessage("welcome")
+        sendemail(mailservice, message)
+        print("Welcome email: Sent to %s" % user["emailPersonal"])
 
     # off-boarding
     else:
@@ -327,6 +327,7 @@ def main():
         # create alias on manager group
         userservice = gmailauth("admin.directory.group")
         mkalias(userservice)
+    '''
 
 if __name__ == "__main__":
     main()

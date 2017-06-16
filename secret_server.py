@@ -33,6 +33,7 @@ def mksecret(token):
     if user["note"] != "Delete":
         secretname  = ("%s, %s's reset/initial password" % (user["lName"], user["fName"])) 
         values = ["", user["email"], user["password"], user["note"], "", "", "", "" , ""]
+        print("On-boarding (Secret Server): New password generated for %s, %s" % (user["lName"], user["fName"]))
 
     # off-boarding
     else:
