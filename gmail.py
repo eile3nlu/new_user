@@ -19,314 +19,322 @@ from email.mime.text import MIMEText
 import mimetypes
 from pprint import pprint
 
-# load new user info
-with open(".new_user.json") as new_user:
-    user = json.load(new_user)
-
-# authenticate api resource
-def gmailauth(setType):
+class new_account:
     
-    # load secret
-    with open(".client_secret.json") as secret:
-        client = json.load(secret)
+    def __init__(self):
 
-    client_id = client["installed"]["client_id"]
-    client_secret = client["installed"]["client_secret"]
-    scope = ("https://www.googleapis.com/auth/%s" % (setType))
+        # load secret
+        with open(".client_secret.json") as secret:
+            self.client = json.load(secret)
 
-    # create flow object 
-    flow = OAuth2WebServerFlow(client_id, client_secret, scope)
+        # load new user info
+        with open(".new_user.json") as new_user:
+            self.user = json.load(new_user)
 
-    # create / refresh credentials
-    storage = Storage(".%s_credentials.dat" % (setType))
-    credentials = storage.get()
-    if credentials is None or credentials.invalid:
-        credentials = tools.run_flow(flow, storage, tools.argparser.parse_args())
+        # load email templates 
+        with open("email_templates.json") as templates:
+            self.template = json.load(templates)
 
-    # create / authorize http object to handle HTTP requests
-    http = httplib2.Http()
-    http = credentials.authorize(http)
+        self.client_id = self.client["installed"]["client_id"]
+        self.client_secret = self.client["installed"]["client_secret"]
 
-    # create object to make API calls
-    if "admin" in setType:
-        service = build("admin", "directory_v1", http=http)
-    elif "gmail" in setType:
-        service = build("gmail", "v1", http=http)
+        self.userservice = self.gmailauth("admin.directory.user")
+        self.aliasservice = self.gmailauth("admin.directory.user.alias")
+        self.groupservice = self.gmailauth("admin.directory.group")
+        self.mailservice = self.gmailauth("gmail.compose")
 
-    return service
+        self.email_sender = "ckoh@keypr.com"
 
-# create new user email based on given information
-def mkemail(service):
+    ### ON-BOARDING ###
 
-
-    userinfo = {
-                "primaryEmail": user["email"],
-                "name": {
-                            "givenName": user["fName"],
-                            "familyName": user["lName"] 
-                        },
-                "password": user["password"] 
-                }
-
-    request = service.users().insert(body=userinfo)
-    response = request.execute()
-
-    print("Keypr Gmail: %s" % user["email"])
-
-# add users to groups
-def setgroups(service):
+    # authenticate api resource
+    def gmailauth(self, setType):
     
-    # team mailing groups
-    if user["role"].lower() == "staff":
-        # staff@keypr.com
-        print("Keypr Gmail Gropus: staff@keypr.com")
-        groups = ["03vac5uf0tebadn"]
+        scope = ("https://www.googleapis.com/auth/%s" % (setType))
 
-    elif user["role"].lower() == "dev":
-        #  dev@keypr.com
-        print("Keypr Gmail Groups: dev@keypr.com")
-        groups = ["03as4poj18f1ku8"]
+        # create flow object 
+        flow = OAuth2WebServerFlow(self.client_id, self.client_secret, scope)
 
-    elif user["role"].lower() == "ops":
-        # bridge-ops@keypr.com, dev@keypr.com, kcs-alerts@keypr.com, ops@keypr.com, security@keypr.com, service-status@keypr.com, build@keypr.com
-        print("Keypr Gmail Groups: bridge-ops@keypr.com, dev@keypr.com, kcs-alerts@keypr.com, ops@keypr.com, security@keypr.com, service-status@keypr.com, build@keypr.com")
-        groups = ["00pkwqa10t6184d", "03as4poj18f1ku8", "01baon6m2p11k2p", "00tyjcwt0jo3gxm", "00ihv6361eix8zb", "035nkun23dv4k8i", "03x8tuzt0lobslp"]
+        # create / refresh credentials
+        storage = Storage(".%s_credentials.dat" % (setType))
+        credentials = storage.get()
+        if credentials is None or credentials.invalid:
+            credentials = tools.run_flow(flow, storage, tools.argparser.parse_args())
 
-    elif user["role"].lower() == "ios":
-        # dev@keypr.com, ios-dev@keypr.com
-        print("Keypr Gmail Groups: dev@keypr.com, ios-dev@keypr.com")
-        groups = ["03as4poj18f1ku8", "03oy7u292fyscdg"]
+        # create / authorize http object to handle HTTP requests
+        http = httplib2.Http()
+        http = credentials.authorize(http)
+
+        # create object to make API calls
+        if "admin" in setType:
+            service = build("admin", "directory_v1", http=http)
+        elif "gmail" in setType:
+            service = build("gmail", "v1", http=http)
+
+        return service
         
-    elif user["role"].lower() == "android":
-        # dev@keypr.com, android-dev@keypr.com
-        print("Keypr Gmail Groups: dev@keypr.com, android-dev@keypr.com")
-        groups = ["03as4poj18f1ku8", "02fk6b3p49a7k54"]
+    # create new user email based on given information
+    def mkemail(self):
 
-    elif user["role"].lower() == "qa":
-        # dev@keypr.com, qateam@keypr.com, testeng@keypr.com
-        print("Keypr Gmail Groups: dev@keypr.com, qateam@keypr.com, testeng@keypr.com")
-        groups = ["03as4poj18f1ku8", "00pkwqa130iy7m3", "030j0zll28x34h6"]
+        userinfo = {
+                    "primaryEmail": self.user["email"],
+                    "name": {
+                                "givenName": self.user["fName"],
+                                "familyName": self.user["lName"] 
+                            },
+                    "password": self.user["password"] 
+                    }
 
-    elif user["role"].lower() == "hardware":
-        # dev@keypr.com, kilt@keypr.com
-        print("Keypr Gmail Groups: dev@keypr.com, kilt@keypr.com")
-        groups = ["03as4poj18f1ku8", "02bn6wsx190y7ep"]
+        request = self.userservice.users().insert(body=userinfo)
+        response = request.execute()
 
-    elif user["role"].lower() == "fs":
-        # fieldservices@keypr.com, support@keypr.com, supportafterhours@keypr.com, updates@keypr.com
-        print("Keypr Gmail Groups: fieldservices@keypr.com, support@keypr.com, supportafterhours@keypr.com, updates@keypr.com")
-        groups = ["01y810tw3w17osf", "02s8eyo146al189", "04f1mdlm3pinoxb", "0111kx3o0iyeqei"]
+        print("Gmail: Account created - %s" % self.user["email"])
 
-    elif user["role"].lower() == "cs":
-        # 
-        print("Keypr Gmail Groups: ")
+    # add users to groups
+    def setgroups(self):
+    
+        # team mailing groups
+        if self.user["role"].lower() == "staff":
+            # staff@keypr.com
+            print("Gmail: Groups added - staff@keypr.com")
+            groups = ["03vac5uf0tebadn"]
+
+        elif self.user["role"].lower() == "dev":
+            #  dev@keypr.com
+            print("Gmail: Groups added - dev@keypr.com")
+            groups = ["03as4poj18f1ku8"]
+
+        elif self.user["role"].lower() == "ops":
+            # bridge-ops@keypr.com, dev@keypr.com, kcs-alerts@keypr.com, ops@keypr.com, security@keypr.com, service-status@keypr.com, build@keypr.com
+            print("Gmail: Groups added - bridge-ops@keypr.com, dev@keypr.com, kcs-alerts@keypr.com, ops@keypr.com, security@keypr.com, service-status@keypr.com, build@keypr.com")
+            groups = ["00pkwqa10t6184d", "03as4poj18f1ku8", "01baon6m2p11k2p", "00tyjcwt0jo3gxm", "00ihv6361eix8zb", "035nkun23dv4k8i", "03x8tuzt0lobslp"]
+
+        elif self.user["role"].lower() == "ios":
+            # dev@keypr.com, ios-dev@keypr.com
+            print("Gmail: Groups added - dev@keypr.com, ios-dev@keypr.com")
+            groups = ["03as4poj18f1ku8", "03oy7u292fyscdg"]
+        
+        elif self.user["role"].lower() == "android":
+            # dev@keypr.com, android-dev@keypr.com
+            print("Gmail: Groups added - dev@keypr.com, android-dev@keypr.com")
+            groups = ["03as4poj18f1ku8", "02fk6b3p49a7k54"]
+
+        elif self.user["role"].lower() == "qa":
+            # dev@keypr.com, qateam@keypr.com, testeng@keypr.com
+            print("Gmail: Groups added - dev@keypr.com, qateam@keypr.com, testeng@keypr.com")
+            groups = ["03as4poj18f1ku8", "00pkwqa130iy7m3", "030j0zll28x34h6"]
+
+        elif self.user["role"].lower() == "hardware":
+            # dev@keypr.com, kilt@keypr.com
+            print("Gmail: Groups added - dev@keypr.com, kilt@keypr.com")
+            groups = ["03as4poj18f1ku8", "02bn6wsx190y7ep"]
+
+        elif self.user["role"].lower() == "fs":
+            # fieldservices@keypr.com, support@keypr.com, supportafterhours@keypr.com, updates@keypr.com
+            print("Gmail: Groups added - fieldservices@keypr.com, support@keypr.com, supportafterhours@keypr.com, updates@keypr.com")
+            groups = ["01y810tw3w17osf", "02s8eyo146al189", "04f1mdlm3pinoxb", "0111kx3o0iyeqei"]
+
+        elif self.user["role"].lower() == "cs":
+            # 
+            print("Gmail: Groups added - ")
+            groups = []
+
+        elif self.user["role"].lower() == "sales":
+            # sales@keypr.com
+            print("Gmail: Groups added - sales@keypr.com")
+            groups = ["04d34og824t1ihr"]
+    
+        # "Group" mailing groups
+        if self.user["contractor"].lower() == "t":
+            # external@keypr.com    
+            print("Gmail: Groups added - external@keypr.com")
+            groups.append("03ygebqi16xg5kj")
+
+        else:
+
+            if self.user["kyiv"].lower() == "t":
+                print("Gmail: Speical Groups - kyiv-team@keypr.com, staff@keypr.com")
+                groups.append("023ckvvd2s3scaj")
+                groups.append("03vac5uf0tebadn")
+            else:
+                print("Gmail: Speical Groups - la-team@keypr.com, staff@keypr.com")
+                groups.append("01ci93xb1za9tyq")
+                groups.append("03vac5uf0tebadn")
+
+        userinfo = {
+                    "kind": "admin#directory#member",
+                    "type": "USER",
+                    "email": self.user["email"],
+                    "role": "MEMBER"
+                    }
+
+        for group in groups:
+            request = self.groupservice.members().insert(body=userinfo, groupKey=group)
+            response = request.execute()
+
+    def sendemail(self, TYPE):
+
+        if TYPE == "welcome":
+            message = MIMEText((self.template[TYPE]["message"] % (self.user["fullName"], self.user["email"], self.user["password"], self.user["email"])), "html")
+            message["to"] = self.user["emailPersonal"] 
+
+        else:
+            message = MIMEText(self.template[TYPE]["message"], "html")
+            message["to"] = self.user["email"] 
+
+        message["from"] = self.email_sender 
+        message["subject"] = self.template[TYPE]["title"]
+
+        message_text =  {"raw": base64.urlsafe_b64encode(message.as_string())}
+
+        # only send welcome to contractors
+        if self.user["contractor"].lower() == "t":
+            if TYPE == "welcome" or TYPE == "calendar":
+                send_message = (self.mailservice.users().messages().send(userId="me", body=message_text).execute())
+                print("Gmail: Email sent -  %s" % TYPE)
+        else:
+            send_message = (self.mailservice.users().messages().send(userId="me", body=message_text).execute())
+            print("Gmail: Email sent -  %s" % TYPE)
+
+    ### OFF BOARDING ###
+
+    def deletegroups(self):
+
+        request = self.groupservice.groups().list(userKey=self.user["email"])
+        response = request.execute()
+
+        groupids = []
         groups = []
 
-    elif user["role"].lower() == "sales":
-        # sales@keypr.com
-        print("Keypr Gmail Groups: sales@keypr.com")
-        groups = ["04d34og824t1ihr"]
-    
-    # "Group" mailing groups
-    if user["contractor"].lower() == "t":
-        # external@keypr.com    
-        print("Keypr Gmail Groups: external@keypr.com")
-        groups.append(["03ygebqi16xg5kj"])
+        for groupid in response["groups"]:
+            groupids.append(groupid["id"]) 
+            groups.append(groupid["name"])
 
-    else:
+        for group in groupids:
+            request = self.groupservice.members().delete(memberKey=self.user["email"], groupKey=group)
+            response = request.execute()
 
-        if user["kyiv"].lower() == "t":
-            print("Speical Groups: kyiv-team@keypr.com, staff@keypr.com")
-            groups.append("023ckvvd2s3scaj")
-            groups.append("03vac5uf0tebadn")
-        else:
-            print("Speical Groups: la-team@keypr.com, staff@keypr.com")
-            groups.append("01ci93xb1za9tyq")
-            groups.append("03vac5uf0tebadn")
+        print("Gmail: %s removed from %s groups" % (self.user["email"], groups))
 
-    userinfo = {
-                "kind": "admin#directory#member",
-                "type": "USER",
-                "email": user["email"],
-                "role": "MEMBER"
-                }
+    def mvemail(self):
 
-    for group in groups:
-        request = service.members().insert(body=userinfo, groupKey=group)
+        userinfo = {
+                    "primaryEmail": self.user["emailPersonal"],
+                    "password": self.user["password"]
+                    }
+
+        request = self.userservice.users().update(userKey=self.user["email"], body=userinfo)
         response = request.execute()
 
+        print("Gmail: Changed %s -> %s" % (self.user["email"], self.user["emailPersonal"]))
 
-# search groups for a list of ID's
-def searchgroups(service):
+    def rmemailalias(self):
 
-    request = service.groups().list(domain = "keypr.com")
-    response = request.execute()
-
-    pprint(response)
-
-def searchemail(service):
-    
-    request = service.users().list(domain="keypr.com", showDeleted = True)
-    response = request.execute()
-
-    pprint(response)
-
-def createmessage(TYPE):
-
-    # load email templates 
-    with open("email_templates.json") as templates:
-        template = json.load(templates)
-
-    if TYPE == "welcome":
-        message = MIMEText((template[TYPE]["message"] % (user["fullName"], user["email"], user["password"], user["email"])), "html")
-        message["to"] = user["emailPersonal"] 
-
-    else:
-        message = MIMEText(template[TYPE]["message"], "html")
-        message["to"] = user["email"] 
-
-    message["from"] = "ckoh@keypr.com"
-    message["subject"] = template[TYPE]["title"]
-
-    return {"raw": base64.urlsafe_b64encode(message.as_string())}
-
-def sendemail(service, message):
-
-    message = (service.users().messages().send(userId="me", body=message).execute())
-
-def deletegroups(service):
-
-    request = service.groups().list(userKey=user["email"])
-    response = request.execute()
-
-    groupids = []
-    groups = []
-    for groupid in response["groups"]:
-       groupids.append(groupid["id"]) 
-       groups.append(groupid["name"])
-
-    for group in groupids:
-        request = service.members().delete(memberKey=user["email"], groupKey=group)
+        request = self.aliasservice.users().aliases().delete(alias=self.user["email"], userKey=self.user["emailPersonal"])
         response = request.execute()
 
-    print("Off-boarding (Gmail): Keypr gmail %s removed from %s groups" % (user["email"], groups))
+        print("Gmail: Alias %s removed from %s" % (self.user["email"], self.user["emailPersonal"]))
 
-def mvemail(service):
+    def mkalias(self):
 
-    userinfo = {
-                "primaryEmail": user["emailPersonal"],
-                "password": user["password"] 
-                }
+        userinfo = {
+                    "alias": self.user["email"]
+                    }
 
-    request = service.users().update(userKey=user["email"], body=userinfo)
-    response = request.execute()
+        if self.user["role"] == "staff":
+            group = ""
 
-    print("Off-boarding (Gmail): Keypr gmail changed %s -> %s" % (user["email"], user["emailPersonal"]))
+        elif self.user["role"] == "ops":
+            group = "ops-manager@keypr.com"
 
-def rmemailalias(service):
+        elif self.user["role"] == "dev":
+            group = "director-sw-eng@keypr.com"
 
-    request = service.users().aliases().delete(alias=user["email"], userKey=user["emailPersonal"])
-    response = request.execute()
+        elif self.user["role"] == "ios":
+            group = "director-sw-eng@keypr.com"
 
-    print("Off-boarding (Gmail): Keypr gmail alias %s removed from %s" % (user["email"], user["emailPersonal"]))
+        elif self.user["role"] == "android":
+            group = "director-sw-eng@keypr.com"
 
-def mkalias(service):
+        elif self.user["role"] == "qa":
+            group = "qa-manager@keypr.com"
 
-    userinfo = {
-                "alias": user["email"]
-                }
+        elif self.user["role"] == "hardware":
+            group = "hw-manager@keypr.com"
 
-    if user["role"] == "staff":
-        group = ""
+        elif self.user["role"] == "fs":
+            group = "fs-manager@keypr.com"
 
-    elif user["role"] == "ops":
-        group = "ops-manager@keypr.com"
+        elif self.user["role"] == "cs":
+            group = "cs-manager@keypr.com"
 
-    elif user["role"] == "dev":
-        group = "director-sw-eng@keypr.com"
+        elif self.user["role"] == "sales":
+            group = "ex-sales@keypr.com"
 
-    elif user["role"] == "ios":
-        group = "director-sw-eng@keypr.com"
+        request = self.groupservice.groups().aliases().insert(groupKey=group, body=userinfo)
+        response = request.execute()
 
-    elif user["role"] == "android":
-        group = "director-sw-eng@keypr.com"
+        print("Gmail: %s added as alias to %s group" % (self.user["email"], group))
 
-    elif user["role"] == "qa":
-        group = "qa-manager@keypr.com"
+    # search groups for a list of ID's
+    def searchgroups(self):
 
-    elif user["role"] == "hardware":
-        group = "hw-manager@keypr.com"
+        request = self.groupservice.groups().list(domain = "keypr.com")
+        response = request.execute()
 
-    elif user["role"] == "fs":
-        group = "fs-manager@keypr.com"
+        pprint(response)
 
-    elif user["role"] == "cs":
-        group = "cs-manager@keypr.com"
+    def searchemail(self):
+    
+        request = self.groupservice.users().list(domain="keypr.com", showDeleted = True)
+        response = request.execute()
 
-    elif user["role"] == "sales":
-        group = "ex-sales@keypr.com"
+        pprint(response)
 
-    request = service.groups().aliases().insert(groupKey=group, body=userinfo)
-    response = request.execute()
+def main(action):
 
-    print("Off-boarding (Gmail): Keypr gmail %s added as alias to %s group" % (user["email"], group))
-
-def main():
+    account = new_account()
 
     # on-boarding
-    if user["note"] != "Delete":
+    if action.lower() == "create":
+
         # create email account
-        userservice = gmailauth("admin.directory.user")
-        mkemail(userservice)
+        account.mkemail()
         time.sleep(3)
-    
+
         # set groups
-        groupservice = gmailauth("admin.directory.group")
-        setgroups(groupservice)
+        account.setgroups()
         time.sleep(3)
 
         # send email notifications
-        mailservice = gmailauth("gmail.compose")
-
-        message = createmessage("welcome")
-        sendemail(mailservice, message)
-        print("Welcome email: Sent to %s" % user["emailPersonal"])
-
-        message = createmessage("calendar")
-        sendemail(mailservice, message)
-        print("Staff calendar email: Sent %s" % user["email"])
+        account.sendemail("welcome")
         time.sleep(3)
 
-        # Only send slack invite to non-contractors (contractors on an as-needed basis)
-        if user["contractor"].lower() == "f":
-            message = createmessage("slack")
-            sendemail(mailservice, message)
-            print("Slack email: Sent to %s" % user["email"])
-            time.sleep(3)
+        account.sendemail("calendar")
+        time.sleep(3)
 
+        account.sendemail("slack")
+        time.sleep(3)
 
     # off-boarding
     else:
 
         # remove user from all groups
-        groupservice = gmailauth("admin.directory.group")
-        deletegroups(groupservice)
+        account.deletegroups()
         time.sleep(3)
 
         # change email to .old
-        # assuming that the users email is in the first initial last name format
-        userservice = gmailauth("admin.directory.user")
-        mvemail(userservice)
+        account.mvemail()
         time.sleep(3)
 
         # remove old keypr.com email from email alias
-        userservice = gmailauth("admin.directory.user.alias")
-        rmemailalias(userservice)
+        account.rmemailalias()
         time.sleep(3)
 
         # create alias on manager group
-        userservice = gmailauth("admin.directory.group")
-        mkalias(userservice)
+        account.mkalias()
 
 if __name__ == "__main__":
-    main()
+
+    action = sys.argv[1]  
+    main(action)
