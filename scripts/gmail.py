@@ -32,7 +32,7 @@ class new_account:
             self.user = json.load(new_user)
 
         # load email templates 
-        with open("email_templates.json") as templates:
+        with open("../templates/email_templates.json") as templates:
             self.template = json.load(templates)
 
         self.client_id = self.client["installed"]["client_id"]
@@ -191,10 +191,10 @@ class new_account:
         if self.user["contractor"].lower() == "t":
             if TYPE == "welcome" or TYPE == "calendar":
                 send_message = (self.mailservice.users().messages().send(userId="me", body=message_text).execute())
-                print("Gmail: Email sent -  %s" % TYPE)
+                print("Gmail: Email sent - %s" % TYPE)
         else:
             send_message = (self.mailservice.users().messages().send(userId="me", body=message_text).execute())
-            print("Gmail: Email sent -  %s" % TYPE)
+            print("Gmail: Email sent - %s" % TYPE)
 
     ### OFF BOARDING ###
 

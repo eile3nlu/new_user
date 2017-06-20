@@ -36,4 +36,5 @@ python gmail.py create
 source jumpcloud.sh
 python confluence.py create
 
-#rm .new_user.json
+rm temp.txt
+rm .new_user.json

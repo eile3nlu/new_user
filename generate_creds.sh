@@ -7,7 +7,7 @@ jcapikey=$3 #JumpCloud
 jirausername=$4 #Jira/Confluence
 jirapassword=$5
 
-cat > .credentials.json <<- EOM
+cat > scripts/.credentials.json <<- EOM
 {
     "secretserver":{
         "username": "$ssusername",

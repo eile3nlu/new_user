@@ -29,4 +29,5 @@ python gmail.py delete
 source jumpcloud.sh
 python confluence.py delete
 
-#rm .new_user.json
+rm temp.txt
+rm .new_user.json

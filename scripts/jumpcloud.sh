@@ -18,22 +18,22 @@ if [ "$note" == 'Delete' ]
 then
 
     # get user ID
-    id=$(curl \
+    id=$(curl -sS \
         -d '{"filter": [{"username" : '$username'}]}' \
         -X 'POST' \
         -H 'Content-Type: application/json' \
         -H 'Accept: application/json' \
         -H 'x-api-key: '$apikey'' \
-        "https://console.jumpcloud.com/api/search/systemusers" | jq ".results[0]._id" | tr -d \")
+        "https://console.jumpcloud.com/api/search/systemusers" | jq ".results[0]._id" | tr -d \" > temp.txt)
 
     # update user information in jumpcloud
-    curl \
+    curl -sS \
         -d '{"password": '$password', "email": '$emailPersonal', "tags": []}' \
         -X 'PUT' \
         -H 'Content-Type: application/json' \
         -H 'Accespt: application/json' \
         -H 'x-api-key: '$apikey'' \
-        'https://console.jumpcloud.com/api/systemusers/'$id
+        'https://console.jumpcloud.com/api/systemusers/'$id > temp.txt
 
     echo "JumpCloud: user password changed, user email changed, user tags removed"
 
@@ -66,12 +66,14 @@ then
         tag+="]"
 
         # create new user in jumpcloud
-        curl \
+        curl -sS \
             -d '{"unix_guid": '$groupid', "unix_uid": '$unixid', "firstname": '$fName', "lastname": '$lName', "email" : '$email', "username" : '$username', "password": '$password', "ldap_binding_user": "true", "tags": '$tag'}' \
             -X 'POST' \
             -H 'Content-Type: application/json' \
             -H 'Accespt: application/json' \
             -H 'x-api-key: '$apikey'' \
-            'https://console.jumpcloud.com/api/systemusers'
+            'https://console.jumpcloud.com/api/systemusers' > temp.txt
+
+            echo "JumpCloud: Account Created for $username"
     fi
 fi

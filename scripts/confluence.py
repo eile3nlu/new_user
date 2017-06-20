@@ -26,9 +26,11 @@ class jira:
     # add new user to jira (keyprprojects.atlassian.net)
     def add_user(self):
 
-        # username, email, directory(?), password, full name, notification, activation
-        self.jc.add_user(self.user["email"], self.user["email"], 1, self.user["password"], self.user["fullName"], False, True)
-        print("Jira/Confluence: User created - %s" % self.user["email"])
+        # contractors do not get confluence access, on an as-needed basis
+        if self.user["contractor"].lower() == "f":
+            # username, email, directory(?), password, full name, notification, activation
+            self.jc.add_user(self.user["email"], self.user["email"], 1, self.user["password"], self.user["fullName"], False, True)
+            print("Jira/Confluence: User created - %s" % self.user["email"])
 
     # set users groups
     def add_group(self):
