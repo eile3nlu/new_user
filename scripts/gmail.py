@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # automate gmail account creation
+# if script stops working tokens might have expired.  
+# remove action arg and run script to re-authorize
+# todo: create a script in 
 
 import httplib2
 import sys
@@ -39,9 +42,10 @@ class new_account:
         self.client_secret = self.client["installed"]["client_secret"]
 
         self.userservice = self.gmailauth("admin.directory.user")
-        self.aliasservice = self.gmailauth("admin.directory.user.alias")
         self.groupservice = self.gmailauth("admin.directory.group")
         self.mailservice = self.gmailauth("gmail.compose")
+
+        self.aliasservice = self.gmailauth("admin.directory.user.alias")
 
         self.email_sender = "ckoh@keypr.com"
 
