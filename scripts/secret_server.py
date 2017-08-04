@@ -21,7 +21,7 @@ class secret_server():
 
         self.client = suds.client.Client("https://www.secretserveronline.com/webservices/SSWebservice.asmx?wsdl")
         self.token = self.client.service.Authenticate(self.creds["secretserver"]["username"], self.creds["secretserver"]["password"], self.creds["secretserver"]["orgcode"], self.creds["secretserver"]["domain"])
-        
+
     def search(self):
 
         # searches for IDs

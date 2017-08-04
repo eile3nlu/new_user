@@ -37,4 +37,4 @@ source jumpcloud.sh
 python confluence.py create
 
 rm temp.txt
-rm .new_user.json
+#rm .new_user.json

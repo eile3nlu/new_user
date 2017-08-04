@@ -30,4 +30,4 @@ source jumpcloud.sh
 python confluence.py delete
 
 rm temp.txt
-rm .new_user.json
+#rm .new_user.json
