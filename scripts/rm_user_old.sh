@@ -1,7 +1,7 @@
 #!/bin/bash
 # offboarding older employee's whos emails dont follow the normal convention of first initial + last name
 
-# Usage: [First Name] [Last Name] [Email] [Role]
+# Usage: ./rm_user_old.sh [First Name] [Last Name] [Email] [Role]
 
 fName=$1
 lName=$2

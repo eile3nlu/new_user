@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: [First Name] [Last Name] [Role]
+# Usage: ./rm_user.sh [First Name] [Last Name] [Role]
 
 fName=$1
 lName=$2
