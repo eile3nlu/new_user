@@ -31,7 +31,7 @@ then
         -d '{"password": '$password', "email": '$emailPersonal', "tags": []}' \
         -X 'PUT' \
         -H 'Content-Type: application/json' \
-        -H 'Accespt: application/json' \
+        -H 'Accept: application/json' \
         -H 'x-api-key: '$apikey'' \
         'https://console.jumpcloud.com/api/systemusers/'$id > temp.txt
 
@@ -67,10 +67,10 @@ then
 
         # create new user in jumpcloud
         curl -sS \
-            -d '{"unix_guid": '$groupid', "unix_uid": '$unixid', "firstname": '$fName', "lastname": '$lName', "email" : '$email', "username" : '$username', "password": '$password', "ldap_binding_user": "true", "tags": '$tag'}' \
+            -d '{"unix_guid": '$groupid', "unix_uid": '$unixid', "firstname": '$fName', "lastname": '$lName', "email" : '$email', "username" : '$username', "password": '$password', "ldap_binding_user": "false", "enable_managed_uid": "true", "tags": '$tag'}' \
             -X 'POST' \
             -H 'Content-Type: application/json' \
-            -H 'Accespt: application/json' \
+            -H 'Accept: application/json' \
             -H 'x-api-key: '$apikey'' \
             'https://console.jumpcloud.com/api/systemusers' > temp.txt
 

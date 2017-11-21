@@ -36,5 +36,7 @@ python gmail.py create
 source jumpcloud.sh
 python confluence.py create
 
+echo 'Please copy and paste the above message into the ticket details (https://keyprprojects.atlassian.net/browse/HD-'$ticketNum')'
+
 rm temp.txt
-#rm .new_user.json
+rm .new_user.json

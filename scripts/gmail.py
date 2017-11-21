@@ -47,7 +47,7 @@ class new_account:
 
         self.aliasservice = self.gmailauth("admin.directory.user.alias")
 
-        self.email_sender = "ckoh@keypr.com"
+        self.email_sender = "chris@keypr.com"
 
     ### ON-BOARDING ###
 
@@ -100,8 +100,47 @@ class new_account:
         # team mailing groups
         if self.user["role"].lower() == "staff":
             # staff@keypr.com
-            print("Gmail: Groups added - staff@keypr.com")
-            groups = ["03vac5uf0tebadn"]
+            print("Gmail: Groups added - ")
+            groups = []
+
+        elif self.user["role"].lower() == "dev":
+            #  dev@keypr.com
+            print("Gmail: Groups added - dev@keypr.com")
+            groups = ["03as4poj18f1ku8"]
+
+        elif self.user["role"].lower() == "ops":
+            # bridge-ops@keypr.com, dev@keypr.com, kcs-alerts@keypr.com, ops@keypr.com, security@keypr.com, service-status@keypr.com, build@keypr.com
+            print("Gmail: Groups added - bridge-ops@keypr.com, dev@keypr.com, kcs-alerts@keypr.com, ops@keypr.com, security@keypr.com, service-status@keypr.com, build@keypr.com")
+            groups = ["00pkwqa10t6184d", "03as4poj18f1ku8", "01baon6m2p11k2p", "00tyjcwt0jo3gxm", "00ihv6361eix8zb", "035nkun23dv4k8i", "03x8tuzt0lobslp"]
+
+        elif self.user["role"].lower() == "ios":
+            # dev@keypr.com, ios-dev@keypr.com
+            print("Gmail: Groups added - dev@keypr.com, ios-dev@keypr.com")
+            groups = ["03as4poj18f1ku8", "03oy7u292fyscdg"]
+        
+        elif self.user["role"].lower() == "android":
+            # dev@keypr.com, android-dev@keypr.com
+            print("Gmail: Groups added - dev@keypr.com, android-dev@keypr.com")
+            groups = ["03as4poj18f1ku8", "02fk6b3p49a7k54"]
+
+        elif self.user["role"].lower() == "qa":
+            # dev@keypr.com, qateam@keypr.com, testeng@keypr.com
+            print("Gmail: Groups added - dev@keypr.com, qateam@keypr.com, testeng@keypr.com")
+            groups = ["03as4poj18f1ku8", "00pkwqa130iy7m3", "030j0zll28x34h6"]
+
+        elif self.user["role"].lower() == "hardware":
+            # dev@keypr.com, kilt@keypr.com
+            print("Gmail: Groups added - dev@keypr.com, kilt@keypr.com")
+            groups = ["03as4poj18f1ku8", "02bn6wsx190y7ep"]
+
+        elif self.user["role"].lower() == "fs":
+            # fieldservices@keypr.com, support@keypr.com, supportafterhours@keypr.com, updates@keypr.com
+            print("Gmail: Groups added - fieldservices@keypr.com, support@keypr.com, supportafterhours@keypr.com, updates@keypr.com")
+            groups = ["01y810tw3w17osf", "02s8eyo146al189", "04f1mdlm3pinoxb", "0111kx3o0iyeqei"]
+
+        elif self.user["role"].lower() == "cs":
+            # 
+            print("Gmail: Groups added - ")
 
         elif self.user["role"].lower() == "dev":
             #  dev@keypr.com
@@ -178,7 +217,13 @@ class new_account:
 
     def sendemail(self, TYPE):
 
+        # Change receipeient (message["to"]) based on email type.
         if TYPE == "welcome":
+
+            #override staff welcome with contractor welcome for contractors
+            if self.user["contractor"].lower() == "t":
+                TYPE = 'welcome_contractor'
+
             message = MIMEText((self.template[TYPE]["message"] % (self.user["fullName"], self.user["email"], self.user["password"], self.user["email"])), "html")
             message["to"] = self.user["emailPersonal"] 
 
@@ -186,14 +231,14 @@ class new_account:
             message = MIMEText(self.template[TYPE]["message"], "html")
             message["to"] = self.user["email"] 
 
+        # set from, subject and encoding
         message["from"] = self.email_sender 
         message["subject"] = self.template[TYPE]["title"]
-
         message_text =  {"raw": base64.urlsafe_b64encode(message.as_string())}
 
         # only send welcome to contractors
         if self.user["contractor"].lower() == "t":
-            if TYPE == "welcome" or TYPE == "calendar":
+            if TYPE == "welcome_contractor":
                 send_message = (self.mailservice.users().messages().send(userId="me", body=message_text).execute())
                 print("Gmail: Email sent - %s" % TYPE)
         else:
@@ -312,13 +357,13 @@ def main(action):
 
         # send email notifications
         account.sendemail("welcome")
-        time.sleep(3)
+        time.sleep(5)
 
         account.sendemail("calendar")
-        time.sleep(3)
+        time.sleep(5)
 
         account.sendemail("slack")
-        time.sleep(3)
+        time.sleep(5)
 
     # off-boarding
     else:
