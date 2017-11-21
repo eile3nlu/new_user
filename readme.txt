@@ -36,5 +36,3 @@ Off-boarding non-conventional emails (rm_user_old.sh) - Use this when a user's e
 
 
 TODO:
-1. Add jira ticket modification to onboarding, to post status of onboarding directly to ticket.
-2. Fix on-boarding "staff" group, issue when assigning gmail groups.
