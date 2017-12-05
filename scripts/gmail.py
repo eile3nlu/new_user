@@ -139,46 +139,6 @@ class new_account:
             groups = ["01y810tw3w17osf", "02s8eyo146al189", "04f1mdlm3pinoxb", "0111kx3o0iyeqei"]
 
         elif self.user["role"].lower() == "cs":
-            # 
-            print("Gmail: Groups added - ")
-
-        elif self.user["role"].lower() == "dev":
-            #  dev@keypr.com
-            print("Gmail: Groups added - dev@keypr.com")
-            groups = ["03as4poj18f1ku8"]
-
-        elif self.user["role"].lower() == "ops":
-            # bridge-ops@keypr.com, dev@keypr.com, kcs-alerts@keypr.com, ops@keypr.com, security@keypr.com, service-status@keypr.com, build@keypr.com
-            print("Gmail: Groups added - bridge-ops@keypr.com, dev@keypr.com, kcs-alerts@keypr.com, ops@keypr.com, security@keypr.com, service-status@keypr.com, build@keypr.com")
-            groups = ["00pkwqa10t6184d", "03as4poj18f1ku8", "01baon6m2p11k2p", "00tyjcwt0jo3gxm", "00ihv6361eix8zb", "035nkun23dv4k8i", "03x8tuzt0lobslp"]
-
-        elif self.user["role"].lower() == "ios":
-            # dev@keypr.com, ios-dev@keypr.com
-            print("Gmail: Groups added - dev@keypr.com, ios-dev@keypr.com")
-            groups = ["03as4poj18f1ku8", "03oy7u292fyscdg"]
-        
-        elif self.user["role"].lower() == "android":
-            # dev@keypr.com, android-dev@keypr.com
-            print("Gmail: Groups added - dev@keypr.com, android-dev@keypr.com")
-            groups = ["03as4poj18f1ku8", "02fk6b3p49a7k54"]
-
-        elif self.user["role"].lower() == "qa":
-            # dev@keypr.com, qateam@keypr.com, testeng@keypr.com
-            print("Gmail: Groups added - dev@keypr.com, qateam@keypr.com, testeng@keypr.com")
-            groups = ["03as4poj18f1ku8", "00pkwqa130iy7m3", "030j0zll28x34h6"]
-
-        elif self.user["role"].lower() == "hardware":
-            # dev@keypr.com, kilt@keypr.com
-            print("Gmail: Groups added - dev@keypr.com, kilt@keypr.com")
-            groups = ["03as4poj18f1ku8", "02bn6wsx190y7ep"]
-
-        elif self.user["role"].lower() == "fs":
-            # fieldservices@keypr.com, support@keypr.com, supportafterhours@keypr.com, updates@keypr.com
-            print("Gmail: Groups added - fieldservices@keypr.com, support@keypr.com, supportafterhours@keypr.com, updates@keypr.com")
-            groups = ["01y810tw3w17osf", "02s8eyo146al189", "04f1mdlm3pinoxb", "0111kx3o0iyeqei"]
-
-        elif self.user["role"].lower() == "cs":
-            # 
             print("Gmail: Groups added - ")
             groups = []
 
