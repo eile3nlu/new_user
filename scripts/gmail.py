@@ -30,10 +30,6 @@ class new_account:
         with open(".client_secret.json") as secret:
             self.client = json.load(secret)
 
-        # load new user info
-        with open(".new_user.json") as new_user:
-            self.user = json.load(new_user)
-
         # load email templates 
         with open("../templates/email_templates.json") as templates:
             self.template = json.load(templates)
@@ -78,84 +74,84 @@ class new_account:
         return service
         
     # create new user email based on given information
-    def mkemail(self):
+    def mkemail(self, fName, lName, email, password):
 
         userinfo = {
-                    "primaryEmail": self.user["email"],
+                    "primaryEmail": email,
                     "name": {
-                                "givenName": self.user["fName"],
-                                "familyName": self.user["lName"] 
+                                "givenName": fName,
+                                "familyName": lName 
                             },
-                    "password": self.user["password"] 
+                    "password": password 
                     }
 
         request = self.userservice.users().insert(body=userinfo)
         response = request.execute()
 
-        print("Gmail: Account created - %s" % self.user["email"])
+        print("Gmail: Account created - %s" % email)
 
     # add users to groups
-    def setgroups(self):
+    def setgroups(self, role, contractor, kyiv, email):
     
         # team mailing groups
-        if self.user["role"].lower() == "staff":
+        if role.lower() == "staff":
             # staff@keypr.com
             print("Gmail: Groups added - ")
             groups = []
 
-        elif self.user["role"].lower() == "dev":
+        elif role.lower() == "dev":
             #  dev@keypr.com
             print("Gmail: Groups added - dev@keypr.com")
             groups = ["03as4poj18f1ku8"]
 
-        elif self.user["role"].lower() == "ops":
+        elif role.lower() == "ops":
             # bridge-ops@keypr.com, dev@keypr.com, kcs-alerts@keypr.com, ops@keypr.com, security@keypr.com, service-status@keypr.com, build@keypr.com
             print("Gmail: Groups added - bridge-ops@keypr.com, dev@keypr.com, kcs-alerts@keypr.com, ops@keypr.com, security@keypr.com, service-status@keypr.com, build@keypr.com")
             groups = ["00pkwqa10t6184d", "03as4poj18f1ku8", "01baon6m2p11k2p", "00tyjcwt0jo3gxm", "00ihv6361eix8zb", "035nkun23dv4k8i", "03x8tuzt0lobslp"]
 
-        elif self.user["role"].lower() == "ios":
+        elif role.lower() == "ios":
             # dev@keypr.com, ios-dev@keypr.com
             print("Gmail: Groups added - dev@keypr.com, ios-dev@keypr.com")
             groups = ["03as4poj18f1ku8", "03oy7u292fyscdg"]
         
-        elif self.user["role"].lower() == "android":
+        elif role.lower() == "android":
             # dev@keypr.com, android-dev@keypr.com
             print("Gmail: Groups added - dev@keypr.com, android-dev@keypr.com")
             groups = ["03as4poj18f1ku8", "02fk6b3p49a7k54"]
 
-        elif self.user["role"].lower() == "qa":
+        elif role.lower() == "qa":
             # dev@keypr.com, qateam@keypr.com, testeng@keypr.com
             print("Gmail: Groups added - dev@keypr.com, qateam@keypr.com, testeng@keypr.com")
             groups = ["03as4poj18f1ku8", "00pkwqa130iy7m3", "030j0zll28x34h6"]
 
-        elif self.user["role"].lower() == "hardware":
+        elif role.lower() == "hardware":
             # dev@keypr.com, kilt@keypr.com
             print("Gmail: Groups added - dev@keypr.com, kilt@keypr.com")
             groups = ["03as4poj18f1ku8", "02bn6wsx190y7ep"]
 
-        elif self.user["role"].lower() == "fs":
+        elif role.lower() == "fs":
             # fieldservices@keypr.com, support@keypr.com, supportafterhours@keypr.com, updates@keypr.com
             print("Gmail: Groups added - fieldservices@keypr.com, support@keypr.com, supportafterhours@keypr.com, updates@keypr.com")
             groups = ["01y810tw3w17osf", "02s8eyo146al189", "04f1mdlm3pinoxb", "0111kx3o0iyeqei"]
 
-        elif self.user["role"].lower() == "cs":
+        elif role.lower() == "cs":
             print("Gmail: Groups added - ")
             groups = []
 
-        elif self.user["role"].lower() == "sales":
+        elif role.lower() == "sales":
             # sales@keypr.com
             print("Gmail: Groups added - sales@keypr.com")
             groups = ["04d34og824t1ihr"]
     
         # "Group" mailing groups
-        if self.user["contractor"].lower() == "t":
+        if contractor.lower() == "t":
             # external@keypr.com    
             print("Gmail: Groups added - external@keypr.com")
             groups.append("03ygebqi16xg5kj")
 
         else:
 
-            if self.user["kyiv"].lower() == "t":
+            if kyiv.lower() == "t":
                 print("Gmail: Speical Groups - kyiv-team@keypr.com, staff@keypr.com")
                 groups.append("023ckvvd2s3scaj")
                 groups.append("03vac5uf0tebadn")
@@ -167,7 +163,7 @@ class new_account:
         userinfo = {
                     "kind": "admin#directory#member",
                     "type": "USER",
-                    "email": self.user["email"],
+                    "email": email,
                     "role": "MEMBER"
                     }
 
@@ -175,21 +171,21 @@ class new_account:
             request = self.groupservice.members().insert(body=userinfo, groupKey=group)
             response = request.execute()
 
-    def sendemail(self, TYPE):
+    def sendemail(self, TYPE, fullName, email, password, emailPersonal, contractor):
 
         # Change receipeient (message["to"]) based on email type.
         if TYPE == "welcome":
 
             #override staff welcome with contractor welcome for contractors
-            if self.user["contractor"].lower() == "t":
+            if contractor.lower() == "t":
                 TYPE = 'welcome_contractor'
 
-            message = MIMEText((self.template[TYPE]["message"] % (self.user["fullName"], self.user["email"], self.user["password"], self.user["email"])), "html")
-            message["to"] = self.user["emailPersonal"] 
+            message = MIMEText((self.template[TYPE]["message"] % (fullName, email, password, email)), "html")
+            message["to"] = emailPersonal 
 
         else:
             message = MIMEText(self.template[TYPE]["message"], "html")
-            message["to"] = self.user["email"] 
+            message["to"] = email 
 
         # set from, subject and encoding
         message["from"] = self.email_sender 
@@ -197,7 +193,7 @@ class new_account:
         message_text =  {"raw": base64.urlsafe_b64encode(message.as_string())}
 
         # only send welcome to contractors
-        if self.user["contractor"].lower() == "t":
+        if contractor.lower() == "t":
             if TYPE == "welcome_contractor":
                 send_message = (self.mailservice.users().messages().send(userId="me", body=message_text).execute())
                 print("Gmail: Email sent - %s" % TYPE)
@@ -300,7 +296,7 @@ class new_account:
 
         pprint(response)
 
-def main(action):
+def main(action, firstName, lastName, fullName, keyprEmail, personalEmail, password, role, contractor, kyiv):
 
     account = new_account()
 
@@ -308,21 +304,21 @@ def main(action):
     if action.lower() == "create":
 
         # create email account
-        account.mkemail()
+        account.mkemail(firstName, lastName, keyprEmail, password)
         time.sleep(3)
 
         # set groups
-        account.setgroups()
+        account.setgroups(role, contractor, kyiv, keyprEmail)
         time.sleep(3)
 
         # send email notifications
-        account.sendemail("welcome")
+        account.sendemail("welcome", fullName, keyprEmail, password, personalEmail, contractor)
         time.sleep(5)
 
-        account.sendemail("calendar")
+        account.sendemail("calendar", fullName, keyprEmail, password, personalEmail, contractor)
         time.sleep(5)
 
-        account.sendemail("slack")
+        account.sendemail("slack", fullName, keyprEmail, password, personalEmail, contractor)
         time.sleep(5)
 
     # off-boarding

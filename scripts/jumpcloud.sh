@@ -2,16 +2,27 @@
 
 # get user information from .new_user.json
 apikey=$(cat .credentials.json | jq ".jumpcloud.apikey" | sed "s/\"//g")
-fName=$(cat .new_user.json | jq ".fName")
-lName=$(cat .new_user.json | jq ".lName")
-email=$(cat .new_user.json | jq ".email")
-emailPersonal=$(cat .new_user.json | jq ".emailPersonal")
-username=$(cat .new_user.json | jq ".username")
-password=$(cat .new_user.json | jq ".password")
-unixid=$(cat .new_user.json | jq ".unixid")
-group=$(cat .new_user.json | jq ".role" | tr -d \")
-contractor=$(cat .new_user.json | jq ".contractor" | tr -d \")
-note=$(cat .new_user.json | jq ".note" | tr -d \")
+fName=$1
+lName=$2
+email=$3
+emailPersonal=$4
+username=$5
+password=$6
+unixid=$7
+group=$8
+contractor=$9
+note=${10}
+
+echo $fName
+echo $lName
+echo $email
+echo $emailPersonal
+echo $username
+echo $password
+echo $unixid
+echo $group
+echo $contractor
+echo $note
 
 # Contractors do not get jumpcloud accounts, on a as needed basis
 if [ "$note" == 'Delete' ]
@@ -40,8 +51,10 @@ then
 elif [ "$note" != 'Delete' ]
 then
 
+    echo 1
     if [ "$contractor" == 'f' ]
     then
+        echo 2
         # modify group settings when role is defined
         if [ "$group" == "staff" ] || [ "$group" == "cs" ] || [ "$group" == "fs" ] || [ "$group" == "sales" ]  
         then
@@ -65,6 +78,15 @@ then
         done
         tag+="]"
 
+        echo $groupid
+        echo $unixid
+        echo $fName
+        echo $lName
+        echo $email
+        echo $username
+        echo $password
+        echo $tag
+        echo $apikey
         # create new user in jumpcloud
         curl -sS \
             -d '{"unix_guid": '$groupid', "unix_uid": '$unixid', "firstname": '$fName', "lastname": '$lName', "email" : '$email', "username" : '$username', "password": '$password', "ldap_binding_user": "false", "enable_managed_uid": "true", "tags": '$tag'}' \
@@ -72,7 +94,8 @@ then
             -H 'Content-Type: application/json' \
             -H 'Accept: application/json' \
             -H 'x-api-key: '$apikey'' \
-            'https://console.jumpcloud.com/api/systemusers' > temp.txt
+            'https://console.jumpcloud.com/api/systemusers'
+
 
             echo "JumpCloud: Account Created for $username"
     fi

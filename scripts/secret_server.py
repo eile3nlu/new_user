@@ -15,10 +15,6 @@ class secret_server():
         with open(".credentials.json") as credentials:
             self.creds = json.load(credentials)
 
-        # load new user details
-        with open(".new_user.json") as new_user:
-            self.user = json.load(new_user)
-
         self.client = suds.client.Client("https://www.secretserveronline.com/webservices/SSWebservice.asmx?wsdl")
         self.token = self.client.service.Authenticate(self.creds["secretserver"]["username"], self.creds["secretserver"]["password"], self.creds["secretserver"]["orgcode"], self.creds["secretserver"]["domain"])
 
@@ -30,19 +26,19 @@ class secret_server():
 
         pprint(secretTypeSearch)
 
-    def mksecret(self, action):
+    def mksecret(self, action, fName, lName, email, password):
 
         # on-boarding
         if action.lower() == "create":
-            secretname  = ("%s, %s's reset/initial password" % (self.user["lName"], self.user["fName"])) 
-            values = ["", self.user["email"], self.user["password"], self.user["note"], "", "", "", "" , ""]
-            print("Secret Server: New password generated for %s, %s" % (self.user["lName"], self.user["fName"]))
+            secretname  = ("%s, %s's reset/initial password" % (lName, fName)) 
+            values = ["", email, password, "", "", "", "", "" , ""]
+            print("Secret Server: New password generated for %s, %s" % (lName, fName))
 
         # off-boarding
         else:
-            secretname  = ("%s, %s's reset/offboarding password" % (self.user["lName"], self.user["fName"])) 
-            values = ["", self.user["email"], self.user["password"], "", "", "", "", "" , ""]
-            print("Secret Server: New password generated for %s, %s" % (self.user["lName"], self.user["fName"]))
+            secretname  = ("%s, %s's reset/offboarding password" % (lName, fName)) 
+            values = ["", email, password, "", "", "", "", "" , ""]
+            print("Secret Server: New password generated for %s, %s" % (lName, fName))
 
         # create secret
         secret = self.client.factory.create("AddSecret")
@@ -63,10 +59,10 @@ class secret_server():
 
         add = self.client.service.AddSecret(secret)
 
-def main(action):
+def main(action, firstName, lastName, personalEmail, password):
 
     secret = secret_server()
-    secret.mksecret(action)
+    secret.mksecret(action, firstName, lastName, personalEmail, password)
 
 if __name__ == "__main__":
 

@@ -31,10 +31,10 @@ cat > .new_user.json <<- EOM
 }
 EOM
 
-python secret_server.py create
-python gmail.py create
+#python secret_server.py create
+#python gmail.py create
 source jumpcloud.sh
-python confluence.py create
+#python confluence.py create
 
 echo 'Please copy and paste the above message into the ticket details (https://keyprprojects.atlassian.net/browse/HD-'$ticketNum')'
 
