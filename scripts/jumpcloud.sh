@@ -91,7 +91,7 @@ then
 
         curl -sS \
             -X 'POST' \
-            -d '{"unix_guid": '$groupid', "unix_uid": '$unixid', "firstname": '$fName', "lastname": '$lName', "email" : '$email', "username" : '$username', "password": '$password', "ldap_binding_user": "false", "enable_managed_uid": "true", "tags": '$tag'}' \
+            -d '{"unix_guid": '$groupid', "unix_uid": "'$unixid'", "firstname": "'$fName'", "lastname": "'$lName'", "email" : "'$email'", "username" : "'$username'", "password": "'$password'", "ldap_binding_user": "false", "enable_managed_uid": "true", "tags": '$tag'}' \
             -H 'Content-Type: application/json' \
             -H 'Accept: application/json' \
             -H 'x-api-key: '$apikey'' \

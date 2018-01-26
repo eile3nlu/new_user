@@ -61,7 +61,7 @@ class new_user:
         
         print("%s %s %s %s %s %s %s %s %s %s" % (type(self.firstName), type(self.lastName), type(self.keyprEmail), type(self.personalEmail), type(self.userName), type(self.password), type(self.unixId), type(self.role), type(self.contractor), type(self.kyiv)))
         #call(['bash', 'jumpcloud.sh', self.firstName, self.lastName, self.keyprEmail, self.personalEmail, self.userName, self.password, '2015', self.role, self.contractor, self.unixId, action])
-        call(['bash', 'jumpcloud.sh', self.firstName, self.lastName, self.keyprEmail, self.personalEmail, self.userName, 'keypr!20301', str(self.unixId), self.role, self.contractor.lower(), action])
+        call(['bash', 'jumpcloud.sh', self.firstName, self.lastName, self.keyprEmail, self.personalEmail, self.userName, self.password, str(self.unixId), self.role, self.contractor.lower(), action])
 
 def main():
 
