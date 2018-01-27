@@ -3,6 +3,7 @@
 
 import gspread
 import secret_server as ss
+import confluence
 import gmail
 import random
 import string
@@ -14,19 +15,19 @@ scope = ['https://spreadsheets.google.com/feeds']
 creds = ServiceAccountCredentials.from_json_keyfile_name('client_secret.json', scope)
 client = gspread.authorize(creds)
  
-def get_new_users():
+def get_new_users(spreadsheet):
 
-    # open spreadsheet
-    sheet = client.open("Employee Spreadsheet").sheet1
- 
-    # get all lines
-    listOfUsers = sheet.get_all_records()
+    # open spreadsheets
+    onboarding = spreadsheet.get_worksheet(0)
+
+    # get all data from on-boaridng list 
+    listOfUsers = onboarding.get_all_records()
 
     return listOfUsers
 
 class new_user:
 
-    def __init__(self, user):
+    def __init__(self, user, spreadsheet):
 
         #Set values
         self.firstName = user['First Name']
@@ -48,32 +49,49 @@ class new_user:
         chars = string.letters + string.digits + string.punctuation
         self.password = ''.join((random.choice(chars)) for x in range(pwdSize))
 
+        #audit logs
+        self.auditSheet = spreadsheet.get_worksheet(4)
+        self.auditData = self.auditSheet.get_all_records
+        self.auditRows = self.auditSheet.row_count
+        self.auditSheet.insert_row([self.fullName, self.startDate, self.accessDate, self.department, self.role], 2)
 
     def secret_server(self, action):
 
-        ss.main(action, self.firstName, self.lastName, self.personalEmail, self.password)
+        #ss.main(action, self.firstName, self.lastName, self.personalEmail, self.password)
+        self.auditSheet.update_cell(2, 6, 'X')
 
     def gmail(self, action):
 
-        gmail.main(action, self.firstName, self.lastName, self.fullName, self.keyprEmail, self.personalEmail, self.password, self.role, self.contractor, self.kyiv)
+        #gmail.main(action, self.firstName, self.lastName, self.fullName, self.keyprEmail, self.personalEmail, self.password, self.role, self.contractor, self.kyiv)
+        self.auditSheet.update_cell(2, 7, 'X')
+        self.auditSheet.update_cell(2, 10, 'X')
+        self.auditSheet.update_cell(2, 11, 'X')
+        self.auditSheet.update_cell(2, 12, 'X')
 
     def jumpcloud(self, action):
         
-        print("%s %s %s %s %s %s %s %s %s %s" % (type(self.firstName), type(self.lastName), type(self.keyprEmail), type(self.personalEmail), type(self.userName), type(self.password), type(self.unixId), type(self.role), type(self.contractor), type(self.kyiv)))
-        #call(['bash', 'jumpcloud.sh', self.firstName, self.lastName, self.keyprEmail, self.personalEmail, self.userName, self.password, '2015', self.role, self.contractor, self.unixId, action])
-        call(['bash', 'jumpcloud.sh', self.firstName, self.lastName, self.keyprEmail, self.personalEmail, self.userName, self.password, str(self.unixId), self.role, self.contractor.lower(), action])
+        #call(['bash', 'jumpcloud.sh', self.firstName, self.lastName, self.keyprEmail, self.personalEmail, self.userName, self.password, str(self.unixId), self.role, self.contractor.lower(), action])
+        self.auditSheet.update_cell(2, 8, 'X')
+
+    def confluence(self, action): 
+
+        #confluence.main(action, self.fullName, self.password, self.contractor, self.keyprEmail)
+        self.auditSheet.update_cell(2, 9, 'X')
 
 def main():
 
-    users = get_new_users()
+    spreadsheet = client.open("Employee Spreadsheet")
+
+    users = get_new_users(spreadsheet)
 
     for user in users:
 
-        onboarding = new_user(user)
+        onboarding = new_user(user, spreadsheet)
 
-        #onboarding.secret_server('create')
-        #onboarding.gmail('create')
+        onboarding.secret_server('create')
+        onboarding.gmail('create')
         onboarding.jumpcloud('create')
+        onboarding.confluence('create')
 
 
 if __name__ == "__main__":
