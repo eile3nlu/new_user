@@ -173,15 +173,22 @@ class new_account:
 
     def sendemail(self, TYPE, fullName, email, password, emailPersonal, contractor):
 
-        # Change receipeient (message["to"]) based on email type.
+        # Set message body
+        # Set receipent based on message type
         if TYPE == "welcome":
+
+            message = MIMEText((self.template[TYPE]["message"] % (fullName, email, password, email)), "html")
+            message["to"] = emailPersonal 
 
             #override staff welcome with contractor welcome for contractors
             if contractor.lower() == "t":
                 TYPE = 'welcome_contractor'
 
-            message = MIMEText((self.template[TYPE]["message"] % (fullName, email, password, email)), "html")
-            message["to"] = emailPersonal 
+        elif TYPE in ['prereview14', 'reviewday', 'postreview15', 'postreview30']:
+
+            message = MIMEText(self.template[TYPE]["message"], "html")
+            # Supervisor email address is passed through as password
+            message["to"] = password 
 
         else:
             message = MIMEText(self.template[TYPE]["message"], "html")
@@ -322,7 +329,7 @@ def main(action, firstName, lastName, fullName, keyprEmail, personalEmail, passw
         time.sleep(5)
 
     # off-boarding
-    else:
+    elif action.lower() == 'delete':
 
         # remove user from all groups
         account.deletegroups()
@@ -338,6 +345,9 @@ def main(action, firstName, lastName, fullName, keyprEmail, personalEmail, passw
 
         # create alias on manager group
         account.mkalias()
+
+    elif action.lower() in ['prereview14', 'reviewday', 'postreview15', 'postreview30']:
+        account.sendemail(action, fullName, keyprEmail, password, personalEmail, contractor)
 
 if __name__ == "__main__":
 
