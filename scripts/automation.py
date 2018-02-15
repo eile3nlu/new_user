@@ -236,12 +236,11 @@ def main():
     # based on the list of users on the On-boarding tab
 
     ## Ask for input "Do you want to process a new user? (Y/N)
-
-
-    ## If Y || y: do actions from line 244 - 256. Else pass
-
-
-    for user in users:
+    new_user=input('Do you want to process a new user? (Y/N) ')
+    
+    ## If Y || y: do actions from line 247 - 259. Else pass
+    if new_user.lower()=='y':
+       for user in users:
 
         onboarding = new_user(user, onboardingSpreadsheet)
 
@@ -253,7 +252,9 @@ def main():
 
         # add user to employee list and remove from onboarding sheet
         onboarding.employee_list_add()
-        #onboarding.remove_from_onboarding()
+        #onboarding.remove_from_onboarding() 
+    else:
+        pass    
 
     # Review Emails / Off-boarding
     # get Active Employee list and department spreadsheets
