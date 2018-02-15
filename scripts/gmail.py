@@ -184,12 +184,13 @@ class new_account:
             if contractor.lower() == "t":
                 TYPE = 'welcome_contractor'
 
-        elif TYPE in ['prereview14', 'reviewday', 'postreview15', 'postreview30']:
+        elif TYPE in ['reviewforms', 'prereview21', 'prereview14', 'reviewday', 'postreview15', 'postreview30']:
 
             message = MIMEText(self.template[TYPE]["message"], "html")
             # Supervisor email address is passed through as password
             message["to"] = password 
 
+        # If message is not routed to Personal or Supervisor email, then send to KEYPR email
         else:
             message = MIMEText(self.template[TYPE]["message"], "html")
             message["to"] = email 
@@ -210,9 +211,9 @@ class new_account:
 
     ### OFF BOARDING ###
 
-    def deletegroups(self):
+    def deletegroups(self, keyprEmail):
 
-        request = self.groupservice.groups().list(userKey=self.user["email"])
+        request = self.groupservice.groups().list(userKey=keyprEmail)
         response = request.execute()
 
         groupids = []
@@ -223,70 +224,71 @@ class new_account:
             groups.append(groupid["name"])
 
         for group in groupids:
-            request = self.groupservice.members().delete(memberKey=self.user["email"], groupKey=group)
+            request = self.groupservice.members().delete(memberKey=keyprEmail, groupKey=group)
             response = request.execute()
 
-        print("Gmail: %s removed from %s groups" % (self.user["email"], groups))
+        print("Gmail: %s removed from %s groups" % (keyprEmail, groups))
 
-    def mvemail(self):
-
-        userinfo = {
-                    "primaryEmail": self.user["emailPersonal"],
-                    "password": self.user["password"]
-                    }
-
-        request = self.userservice.users().update(userKey=self.user["email"], body=userinfo)
-        response = request.execute()
-
-        print("Gmail: Changed %s -> %s" % (self.user["email"], self.user["emailPersonal"]))
-
-    def rmemailalias(self):
-
-        request = self.aliasservice.users().aliases().delete(alias=self.user["email"], userKey=self.user["emailPersonal"])
-        response = request.execute()
-
-        print("Gmail: Alias %s removed from %s" % (self.user["email"], self.user["emailPersonal"]))
-
-    def mkalias(self):
+    def mvemail(self, keyprEmail, personalEmail, password):
+        print(personalEmail)
 
         userinfo = {
-                    "alias": self.user["email"]
+                    "primaryEmail": personalEmail,
+                    "password": password 
                     }
 
-        if self.user["role"] == "staff":
+        request = self.userservice.users().update(userKey=keyprEmail, body=userinfo)
+        response = request.execute()
+
+        print("Gmail: Changed %s -> %s" % (keyprEmail, personalEmail))
+
+    def rmemailalias(self, keyprEmail, personalEmail):
+
+        request = self.aliasservice.users().aliases().delete(alias=keyprEmail, userKey=personalEmail)
+        response = request.execute()
+
+        print("Gmail: Alias %s removed from %s" % (keyprEmail, personalEmail))
+
+    def mkalias(self, keyprEmail, role):
+
+        userinfo = {
+                    "alias": keyprEmail 
+                    }
+
+        if role == "staff":
             group = ""
 
-        elif self.user["role"] == "ops":
+        elif role == "ops":
             group = "ops-manager@keypr.com"
 
-        elif self.user["role"] == "dev":
+        elif role == "dev":
             group = "director-sw-eng@keypr.com"
 
-        elif self.user["role"] == "ios":
+        elif role == "ios":
             group = "director-sw-eng@keypr.com"
 
-        elif self.user["role"] == "android":
+        elif role == "android":
             group = "director-sw-eng@keypr.com"
 
-        elif self.user["role"] == "qa":
+        elif role == "qa":
             group = "qa-manager@keypr.com"
 
-        elif self.user["role"] == "hardware":
+        elif role == "hardware":
             group = "hw-manager@keypr.com"
 
-        elif self.user["role"] == "fs":
+        elif role == "fs":
             group = "fs-manager@keypr.com"
 
-        elif self.user["role"] == "cs":
+        elif role == "cs":
             group = "cs-manager@keypr.com"
 
-        elif self.user["role"] == "sales":
+        elif role == "sales":
             group = "ex-sales@keypr.com"
 
         request = self.groupservice.groups().aliases().insert(groupKey=group, body=userinfo)
         response = request.execute()
 
-        print("Gmail: %s added as alias to %s group" % (self.user["email"], group))
+        print("Gmail: %s added as alias to %s group" % (keyprEmail, group))
 
     # search groups for a list of ID's
     def searchgroups(self):
@@ -332,21 +334,23 @@ def main(action, firstName, lastName, fullName, keyprEmail, personalEmail, passw
     elif action.lower() == 'delete':
 
         # remove user from all groups
-        account.deletegroups()
+        account.deletegroups(keyprEmail)
         time.sleep(3)
 
         # change email to .old
-        account.mvemail()
+        # personalEmail = firstInitial + lastName + ".old@keypr.com"
+        # ex. ckoh.old@keypr.com
+        account.mvemail(keyprEmail, personalEmail, password)
         time.sleep(3)
 
         # remove old keypr.com email from email alias
-        account.rmemailalias()
+        account.rmemailalias(keyprEmail, personalEmail)
         time.sleep(3)
 
         # create alias on manager group
-        account.mkalias()
+        account.mkalias(keyprEmail, role)
 
-    elif action.lower() in ['prereview14', 'reviewday', 'postreview15', 'postreview30']:
+    elif action.lower() in ['reviewforms', 'prereview21', 'prereview14', 'reviewday', 'postreview15', 'postreview30']:
         account.sendemail(action, fullName, keyprEmail, password, personalEmail, contractor)
 
 if __name__ == "__main__":

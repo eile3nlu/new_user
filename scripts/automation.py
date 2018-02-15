@@ -46,12 +46,14 @@ class review_user:
         
 
         # set employee values
-        self.fullName = user['Name']
+        self.firstName = user['First Name']
+        self.lastName = user['Last Name']
+        self.fullName = ("%s %s" % (self.firstName, self.lastName))
         self.personalEmail = user['Personal Email']
         self.keyprEmail = user['Keypr Email']
         self.phone = user['Phone']
         self.status = user['Status']
-        self.hireDate = user['Hire Date']
+        self.hireDate = user['Start Date']
         self.department = user['Department']
         self.role = user['Role']
         self.contractor = user['Contractor']
@@ -64,13 +66,13 @@ class review_user:
                 self.supervisorEmail = department['Contact Email']
 
         # configure current year review date based on year hired 
-        today = datetime.now()
-        startDate = datetime.strptime(self.hireDate, "%m/%d/%Y")
-        yearDelta = today.year - startDate.year
-        reviewDate = startDate + relativedelta(years =+ yearDelta)
+        self.today = datetime.now()
+        self.startDate = datetime.strptime(self.hireDate, "%m/%d/%Y")
+        yearDelta = self.today.year - self.startDate.year
+        reviewDate = self.startDate + relativedelta(years =+ yearDelta)
 
         # get date difference between today and review day
-        self.dateDiff = (reviewDate - today).days
+        self.dateDiff = (reviewDate - self.today).days
 
     # send review emails based on dates
     def send_review(self, action):
@@ -82,26 +84,42 @@ class review_user:
         # -14: Reminder to managers to send completed employee and manager review forms to HR inbox
         # 0: 2 Emails, Reminder to manger to schedule 1 on 1.  
 
-        # 14 - Day Pre-Review Notice
-        if self.dateDiff == 13:
+        # Skip sending review process emails if employee's hire date was this year
+        if self.today.year != self.startDate.year:
 
-            gmail.main('prereview14', '', '', self.fullName, self.keyprEmail, self.personalEmail, self.supervisorEmail, self.role, self.contractor, self.kyiv)
+            # 30 - Day Review Form Distribution 
+            if self.dateDiff == 29:
 
-        # Review Day Notice
-        elif self.dateDiff == -1: 
+                gmail.main('reviewforms', '', '', self.fullName, self.keyprEmail, self.personalEmail, self.supervisorEmail, self.role, self.contractor, self.kyiv)
+    
+            # 21 - Day Pre-Review Notice
+            elif self.dateDiff == 20:
 
-            gmail.main('reviewday', '', '', self.fullName, self.keyprEmail, self.personalEmail, self.supervisorEmail, self.role, self.contractor, self.kyiv)
+                gmail.main('prereview21', '', '', self.fullName, self.keyprEmail, self.personalEmail, self.supervisorEmail, self.role, self.contractor, self.kyiv)
 
-        # 15 Day Post-Review
-        elif self.dateDiff == -16:
+            # 14 - Day Pre-Review Notice
+            elif self.dateDiff == 13:
 
-            gmail.main('postreview15', '', '', self.fullName, self.keyprEmail, self.personalEmail, self.supervisorEmail, self.role, self.contractor, self.kyiv)
+                gmail.main('prereview14', '', '', self.fullName, self.keyprEmail, self.personalEmail, self.supervisorEmail, self.role, self.contractor, self.kyiv)
 
+            # Review Day Notice
+            elif self.dateDiff == -1: 
+
+                gmail.main('reviewday', '', '', self.fullName, self.keyprEmail, self.personalEmail, self.supervisorEmail, self.role, self.contractor, self.kyiv)
+
+            # 15 Day Post-Review
+            elif self.dateDiff == -16:
+
+                gmail.main('postreview15', '', '', self.fullName, self.keyprEmail, self.personalEmail, self.supervisorEmail, self.role, self.contractor, self.kyiv)
         
-        # 30 Day Post-Review
-        elif self.dateDiff == -31:
+            # 30 Day Post-Review
+            elif self.dateDiff == -31:
 
-            gmail.main('postreview30', '', '', self.fullName, self.keyprEmail, self.personalEmail, self.supervisorEmail, self.role, self.contractor, self.kyiv)
+                gmail.main('postreview30', '', '', self.fullName, self.keyprEmail, self.personalEmail, self.supervisorEmail, self.role, self.contractor, self.kyiv)
+
+        else:
+        
+            print("%s onboarded this year (%s) skipping review emails" % (self.fullName, self.startDate))
 
 class new_user:
 
@@ -113,7 +131,7 @@ class new_user:
         self.firstName = user['First Name']
         self.lastName = user['Last Name']
         self.fullName = ("%s %s" % (self.firstName, self.lastName))
-        self.personalEmail = user['Email']
+        self.personalEmail = user['Personal Email']
         self.userName = ("%s%s" % (self.firstName[0].lower(), self.lastName.lower()))
         self.keyprEmail = ("%s@keypr.com" % (self.userName))
         self.phone = user['Phone']
@@ -121,9 +139,15 @@ class new_user:
         self.accessDate = user['KEYPR System Access Date']
         self.department = user['Department']
         self.role = user['Role']
-        self.contractor = user['Contractor [T/F]']
-        self.kyiv = user['Kyiv [T/F]']
-        self.unixId = user['Unix ID']
+        try:
+            self.contractor = user['Contractor [T/F]']
+            self.kyiv = user['Kyiv [T/F]']
+            self.unixId = user['Unix ID']
+        except:
+            print("Offboarding no contractor / id / kyiv")
+            self.contractor = '' 
+            self.kyiv = '' 
+            self.unixId = '' 
 
         pwdSize = 14
         chars = string.letters + string.digits + string.punctuation
@@ -143,7 +167,7 @@ class new_user:
 
     def secret_server(self, action):
 
-        #ss.main(action, self.firstName, self.lastName, self.personalEmail, self.password)
+        ss.main(action, self.firstName, self.lastName, self.personalEmail, self.password)
         self.auditSheet.update_cell(2, 6, 'X')
 
         if action == 'create':
@@ -156,14 +180,18 @@ class new_user:
     # Create KEYPR gmail account, add to groups based on department, send notification emails
     def gmail(self, action):
 
-        #gmail.main(action, self.firstName, self.lastName, self.fullName, self.keyprEmail, self.personalEmail, self.password, self.role, self.contractor, self.kyiv)
-        self.auditSheet.update_cell(2, 7, 'X')
-        self.auditSheet.update_cell(2, 10, 'X')
-        self.auditSheet.update_cell(2, 11, 'X')
-        self.auditSheet.update_cell(2, 12, 'X')
-        print('Gmail Account Created')
-        print('Gmail Groups Set')
-        print('Welcomie Email sent')
+        if action == 'create':
+            gmail.main(action, self.firstName, self.lastName, self.fullName, self.keyprEmail, self.personalEmail, self.password, self.role, self.contractor, self.kyiv)
+            self.auditSheet.update_cell(2, 7, 'X')
+            self.auditSheet.update_cell(2, 10, 'X')
+            self.auditSheet.update_cell(2, 11, 'X')
+            self.auditSheet.update_cell(2, 12, 'X')
+            print('Gmail Account Created')
+            print('Gmail Groups Set')
+            print('Welcomie Email sent')
+        else:
+            self.personalEmail = ("%s.old@keypr.com" % (self.userName))
+            gmail.main(action, self.firstName, self.lastName, self.fullName, self.keyprEmail, self.personalEmail, self.password, self.role, self.contractor, self.kyiv)
         
     # Create jumpcloud user
     def jumpcloud(self, action):
@@ -210,6 +238,7 @@ def main():
 
         onboarding = new_user(user, onboardingSpreadsheet)
 
+        '''
         # Create accounts and set access
         onboarding.secret_server('create')
         onboarding.gmail('create')
@@ -219,6 +248,7 @@ def main():
         # add user to employee list and remove from onboarding sheet
         onboarding.employee_list_add()
         #onboarding.remove_from_onboarding()
+        '''
 
     # Review Emails / Off-boarding
     # get Active Employee list and department spreadsheets
@@ -233,6 +263,12 @@ def main():
         review.send_review('review')
         
         # Off-boarding
+        if user["Status"] == "Inactive":
+            offboarding = new_user(user, onboardingSpreadsheet)
+            #offboarding.secret_server('delete')
+            #offboarding.gmail('delete')
+            onboarding.jumpcloud('delete')
+        
     
 
 if __name__ == "__main__":
