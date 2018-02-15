@@ -167,7 +167,7 @@ class new_user:
 
     def secret_server(self, action):
 
-        ss.main(action, self.firstName, self.lastName, self.personalEmail, self.password)
+        #ss.main(action, self.firstName, self.lastName, self.personalEmail, self.password)
         self.auditSheet.update_cell(2, 6, 'X')
 
         if action == 'create':
@@ -181,7 +181,7 @@ class new_user:
     def gmail(self, action):
 
         if action == 'create':
-            gmail.main(action, self.firstName, self.lastName, self.fullName, self.keyprEmail, self.personalEmail, self.password, self.role, self.contractor, self.kyiv)
+            #gmail.main(action, self.firstName, self.lastName, self.fullName, self.keyprEmail, self.personalEmail, self.password, self.role, self.contractor, self.kyiv)
             self.auditSheet.update_cell(2, 7, 'X')
             self.auditSheet.update_cell(2, 10, 'X')
             self.auditSheet.update_cell(2, 11, 'X')
@@ -191,7 +191,7 @@ class new_user:
             print('Welcomie Email sent')
         else:
             self.personalEmail = ("%s.old@keypr.com" % (self.userName))
-            gmail.main(action, self.firstName, self.lastName, self.fullName, self.keyprEmail, self.personalEmail, self.password, self.role, self.contractor, self.kyiv)
+            #gmail.main(action, self.firstName, self.lastName, self.fullName, self.keyprEmail, self.personalEmail, self.password, self.role, self.contractor, self.kyiv)
         
     # Create jumpcloud user
     def jumpcloud(self, action):
@@ -234,11 +234,17 @@ def main():
 
     # Onboarding
     # based on the list of users on the On-boarding tab
+
+    ## Ask for input "Do you want to process a new user? (Y/N)
+
+
+    ## If Y || y: do actions from line 244 - 256. Else pass
+
+
     for user in users:
 
         onboarding = new_user(user, onboardingSpreadsheet)
 
-        '''
         # Create accounts and set access
         onboarding.secret_server('create')
         onboarding.gmail('create')
@@ -248,7 +254,6 @@ def main():
         # add user to employee list and remove from onboarding sheet
         onboarding.employee_list_add()
         #onboarding.remove_from_onboarding()
-        '''
 
     # Review Emails / Off-boarding
     # get Active Employee list and department spreadsheets
