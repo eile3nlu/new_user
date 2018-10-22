@@ -5,11 +5,12 @@ Credentials:
 On-boarding (new_user.sh) - Setting up a new user will do the following
     1. Create a new randomly generated password, store the password in SecretServer
     2. Create a gmail account using first_initial+last_name@keypr.com
-    3. Join groups which are assoicated by the users team
+    3. Join groups which are associated by the users team
     4. Send slack, staff calendar and welcome emails
-    5. Create users JumpCloud account
-    6. Create users Jira/Confluence account
-    7. Assign user to the internal-dev group
+    5. Create users Jumpcloud account
+    6. Create users Asana account
+    7. Create users Infura email account
+    8. Assign user to the internal-dev group
 
     Usage: ./new_user.sh [First Name] [Last Name] [Personal Email] [Role] [Contractor?] [Kyiv?] [Unix ID] [Jira Ticket Number]
         Possible roles: staff, ops, dev, ios, android, qa, hardware, fs, cs, sales, contractor
